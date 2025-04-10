@@ -29,6 +29,9 @@ class Pipeline:
         # start timer
         start_time = time.time()
 
+        self.LOGGER.info("Starting pipeline run")
+        self.LOGGER.info(f"RUN_ID: {self.run_id}")
+
         global_config = self.config['global']
 
         if bool(global_config['run_modular']):
