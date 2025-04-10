@@ -17,10 +17,8 @@ echo 'Activating conda environment'
 source /user/work/hv23625/miniforge3/etc/profile.d/conda.sh
 conda deactivate
 conda activate mldm-env
-conda info --envs
 
 echo 'Running python script'
-which python
 python main.py
 
 echo 'Slurm job finished'
