@@ -9,7 +9,7 @@ from skimage import io
 import logging
 import sys
 
-from utils import helpers as hlp
+from code.utils import helpers as hlp
 
 
 class DownloadData:

@@ -6,9 +6,9 @@ from configparser import ConfigParser
 import time
 import sys
 
-from utils import helpers as hlp
+from code.utils import helpers as hlp
 
-from modules.DownloadData import DownloadData
+from code.modules.DownloadData import DownloadData
 
 
 class Pipeline:
@@ -99,18 +99,18 @@ class Pipeline:
         
         # run specified module
         if module == 'download':
-            self.LOGGER.info('Runnind the data download module')
-            dd = DownloadData(config=self.modular_config['data_download'], logger=self.LOGGER)
+            self.LOGGER.info('Running the data download module')
+            dd = DownloadData(config=self.modular_config['download_data'], logger=self.LOGGER)
             dd.download_data()
 
         elif module == 'process':
-            self.LOGGER.info('Runnind the data processing module')
+            self.LOGGER.info('Running the data processing module')
             pass
 
         elif module == 'train':
-            self.LOGGER.info('Runnind the model training module')
+            self.LOGGER.info('Running the model training module')
             pass
 
         elif module == 'evaluate':
-            self.LOGGER.info('Runnind the model evaluation module')
+            self.LOGGER.info('Running the model evaluation module')
             pass
