@@ -12,7 +12,7 @@ def setup_logger(run_id: str, folder: str) -> logging.Logger:
     os.makedirs(os.path.dirname(logging_file), exist_ok=True)
 
     logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(name)-12s %(levelname)-8s %(messages)s',
+                        format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%m-%d %H:%M',
                         filename=logging_file,
                         filemode='w')
