@@ -13,7 +13,7 @@ def setup_logger(run_id: str, folder: str) -> logging.Logger:
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                        datefmt='%m-%d %H:%M',
+                        datefmt='%d-%m-%Y %H:%M:%S',
                         filename=logging_file,
                         filemode='w')
     
@@ -26,7 +26,7 @@ def setup_logger(run_id: str, folder: str) -> logging.Logger:
 
     logging.getLogger('').addHandler(console)
 
-    LOGGER = logging.getLogger(f'{run_id}.logger')
+    LOGGER = logging.getLogger(f'MLDM-{run_id}.logger')
 
     return LOGGER
 
