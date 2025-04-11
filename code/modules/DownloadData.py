@@ -65,7 +65,7 @@ class DownloadData:
         input_filepath = os.path.join(self.input_path, 'dataset1')
 
         for patient_id in os.listdir(input_filepath):
-            patient_folder = os.path.join(self.input_path, patient_id)
+            patient_folder = os.path.join(input_filepath, patient_id)
 
             # check if the item is a folder because
             # files exist in the directory
@@ -78,7 +78,7 @@ class DownloadData:
                 assert len(os.listdir(patient_folder))==1
             except Exception as e:
                 msg = (f"{patient_id} has {len(os.listdir(patient_folder))} "
-                       "subfolders instead of 1. The following error was raised: {e}")
+                       f"subfolders instead of 1. The following error was raised: {e}")
                 self.LOGGER.error(msg)
                 sys.exit()
 
