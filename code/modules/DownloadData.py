@@ -30,7 +30,7 @@ class DownloadData:
         self.clinical2 = self.download_clinical_data('dataset2', 'clinical2.csv')
 
         self.LOGGER.info('Downloading (PET)CT segmented images data')
-        self.image_data_dict = self.download_ct_data()
+        self.seg_image_data_dict = self.download_segmented_ct_data()
 
 
 
@@ -55,7 +55,7 @@ class DownloadData:
         return df
 
 
-    def download_ct_data(self):
+    def download_segmented_ct_data(self):
         """
         Download the (PET)CT segmented image data from the shared HPC area
         """
@@ -63,6 +63,7 @@ class DownloadData:
         image_data_dict = {}
 
         input_filepath = os.path.join(self.input_path, 'dataset1')
+        output_directory = os.path.join(self.output_path, 'ct_image')
 
         for patient_id in os.listdir(input_filepath):
             patient_folder = os.path.join(input_filepath, patient_id)
@@ -99,30 +100,30 @@ class DownloadData:
             assert os.listdir(seg_folder)[0].endswith('.dcm')
 
             seg_file = os.path.join(seg_folder, os.listdir(seg_folder)[0])
-            try:
-                seg_image = io.imread(seg_file)
-                self.LOGGER.info(f"Loaded {seg_file} successfully")
-            except Exception as e:
-                self.LOGGER.error(f"Error reading {seg_file}: {e}")
-                sys.exit()
-
-
-            # save the image
-            patient_save_path = os.path.join(self.output_path, 'ct_image', patient_id)
+            seg_image, seg_meta = hlp.load_dicom(seg_file, self.LOGGER)
+            
+            # save the metadata as csv
+            metadata_filename = f"seg_metadata_{patient_id}.csv"
+            patient_save_path = os.path.join(output_directory, patient_id)
+            metadata_save_loc = os.path.join(patient_save_path, metadata_filename)
             if not os.path.exists(patient_save_path):
                 os.makedirs(patient_save_path)
-            image_filename = f'seg_image_{patient_id}.dcm'.lower()
-            image_save_loc = os.path.join(patient_save_path, image_filename)
-            try:
-                io.imsave(image_save_loc, seg_image)
-                self.LOGGER.info(f'Saved {seg_file} to {image_save_loc}')
-            except Exception as e:
-                self.LOGGER.error(f'Error saving {seg_file} to {image_save_loc}: {e}')
-                sys.exit()
+            seg_meta_df = pd.DataFrame(seg_meta).T
+            hlp.save_csv(seg_meta_df, f"Segmented image metadata for {patient_id}",
+                         metadata_save_loc, self.LOGGER)
 
+
+            # save the image as jpeg
+            image_filename =  f"seg_image_{patient_id}.jpg"
+            image_save_loc = os.path.join(patient_save_path, image_filename)
+            hlp.save_medical_image(seg_image, f"Segmented image for {patient_id}",
+                                   image_save_loc, self.LOGGER)
 
             # populate the data dictionary
-            image_data_dict[patient_id] = seg_image
+            seg_image_data = {['segmented_image']: seg_image,
+                              ['segmented_image_metadata']: seg_meta}
+            
+            image_data_dict[patient_id] = seg_image_data
         
         return image_data_dict
 
