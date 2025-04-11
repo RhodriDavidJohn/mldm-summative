@@ -62,7 +62,9 @@ class DownloadData:
 
         image_data_dict = {}
 
-        for patient_id in os.listdir(self.input_path):
+        input_filepath = os.path.join(self.input_path, 'dataset1')
+
+        for patient_id in os.listdir(input_filepath):
             patient_folder = os.path.join(self.input_path, patient_id)
 
             # check if the item is a folder because
