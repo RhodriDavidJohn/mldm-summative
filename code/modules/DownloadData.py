@@ -73,10 +73,12 @@ class DownloadData:
             # the patient folder should only contain one item
             # which is a subfolder
             try:
-	    	assert len(os.listdir(patient_folder))==1
-	    except Exception as e:
-		self.LOGGER.error(f"{patient_id} has {len(os.listdir(patient_folder))} subfolders instead of 1. The following error was raised: {e}")
-		sys.exit()
+                assert len(os.listdir(patient_folder))==1
+            except Exception as e:
+                msg = (f"{patient_id} has {len(os.listdir(patient_folder))} "
+                       "subfolders instead of 1. The following error was raised: {e}")
+                self.LOGGER.error(msg)
+                sys.exit()
 
             subfolder = os.path.join(patient_folder, os.listdir(patient_folder)[0])
 
