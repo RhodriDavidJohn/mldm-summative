@@ -26,21 +26,21 @@ class DownloadData:
         """
 
         self.LOGGER.info('Downloading clinical data')
-        self.clinical1 = self.download_clinical_data('clinical1.csv')
-        self.clinical2 = self.download_clinical_data('clinical2.csv')
+        self.clinical1 = self.download_clinical_data('dataset1', 'clinical1.csv')
+        self.clinical2 = self.download_clinical_data('dataset2', 'clinical2.csv')
 
         self.LOGGER.info('Downloading (PET)CT segmented images data')
         self.image_data_dict = self.download_ct_data()
 
 
 
-    def download_clinical_data(self, filename) -> pd.DataFrame:
+    def download_clinical_data(self, dataset: str, filename: str) -> pd.DataFrame:
         """
         Download the clinical csv data from the shared HPC area
         """
 
         # load the data
-        input_filepath = os.path.join(self.input_path, 'dataset1', filename)
+        input_filepath = os.path.join(self.input_path, dataset, filename)
 
         df = hlp.load_csv(input_filepath, self.LOGGER)
 
@@ -72,7 +72,11 @@ class DownloadData:
             
             # the patient folder should only contain one item
             # which is a subfolder
-            assert len(os.listdir(patient_folder))==1
+            try:
+	    	assert len(os.listdir(patient_folder))==1
+	    except Exception as e:
+		self.LOGGER.error(f"{patient_id} has {len(os.listdir(patient_folder))} subfolders instead of 1. The following error was raised: {e}")
+		sys.exit()
 
             subfolder = os.path.join(patient_folder, os.listdir(patient_folder)[0])
 
