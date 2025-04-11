@@ -89,12 +89,11 @@ def load_dicom(filepath: str, LOGGER: logging.Logger) -> tuple[np.ndarray, dict]
         dicom_file = pydicom.dcmread(filepath)
         pixel_array = dicom_file.pixel_array
         image = (pixel_array / np.max(pixel_array) * 255).astype(np.uint8)
-        metadata = {elem.keyword: elem.value for elem in dicom_file}
     except Exception as e:
         LOGGER.error(f"Error reading {filepath}: {e}")
         sys.exit()
     
-    return image, metadata
+    return image
 
 
 def save_medical_image(image: np.ndarray,

@@ -100,30 +100,24 @@ class DownloadData:
             assert os.listdir(seg_folder)[0].endswith('.dcm')
 
             seg_file = os.path.join(seg_folder, os.listdir(seg_folder)[0])
-            seg_image, seg_meta = hlp.load_dicom(seg_file, self.LOGGER)
-            
-            # save the metadata as csv
-            metadata_filename = f"seg_metadata_{patient_id}.csv"
-            patient_save_path = os.path.join(output_directory, patient_id)
-            metadata_save_loc = os.path.join(patient_save_path, metadata_filename)
-            if not os.path.exists(patient_save_path):
-                os.makedirs(patient_save_path)
-            seg_meta_df = pd.DataFrame(seg_meta).T
-            hlp.save_csv(seg_meta_df, f"Segmented image metadata for {patient_id}",
-                         metadata_save_loc, self.LOGGER)
+            seg_image = hlp.load_dicom(seg_file, self.LOGGER)
 
 
             # save the image as jpeg
+            patient_save_path = os.path.join(output_directory, patient_id)
+            if not os.poath.exists(patient_save_path):
+                os.makedirs(patient_save_path)
             image_filename =  f"seg_image_{patient_id}.jpg"
             image_save_loc = os.path.join(patient_save_path, image_filename)
             hlp.save_medical_image(seg_image, f"Segmented image for {patient_id}",
                                    image_save_loc, self.LOGGER)
 
             # populate the data dictionary
-            seg_image_data = {['segmented_image']: seg_image,
-                              ['segmented_image_metadata']: seg_meta}
-            
-            image_data_dict[patient_id] = seg_image_data
+            image_data_dict[patient_id] = seg_image
+        
+        msg = (f"Downloaded {len(image_data_dict)} segemented images "
+               f"and saved to {output_directory}")
+        self.LOGGER.info(msg)
         
         return image_data_dict
 
