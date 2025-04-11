@@ -83,7 +83,7 @@ def save_csv(
     return None
 
 
-def load_dicom(filepath: str, LOGGER: logging.Logger) -> tuple[np.ndarray, dict]:
+def load_dicom(filepath: str, LOGGER: logging.Logger) -> np.ndarray:
 
     try:
         dicom_file = pydicom.dcmread(filepath)

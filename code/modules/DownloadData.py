@@ -105,9 +105,9 @@ class DownloadData:
 
             # save the image as jpeg
             patient_save_path = os.path.join(output_directory, patient_id)
-            if not os.poath.exists(patient_save_path):
+            if not os.path.exists(patient_save_path):
                 os.makedirs(patient_save_path)
-            image_filename =  f"seg_image_{patient_id}.jpg"
+            image_filename =  f"seg_image_{patient_id}.png"
             image_save_loc = os.path.join(patient_save_path, image_filename)
             hlp.save_medical_image(seg_image, f"Segmented image for {patient_id}",
                                    image_save_loc, self.LOGGER)
