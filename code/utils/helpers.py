@@ -1,6 +1,9 @@
 
 import os
 import pandas as pd
+import numpy as np
+import pydicom
+from skimage import io
 import logging
 from datetime import datetime
 import sys
@@ -76,3 +79,34 @@ def save_csv(
     except Exception as e:
         logging.error(f"Error saving {data_name} to {output_path}: {e}")
         sys.exit()
+    
+    return None
+
+
+def load_dicom(filepath: str, LOGGER: logging.Logger) -> tuple[np.ndarray, dict]:
+
+    try:
+        dicom_file = pydicom.dcmread(filepath)
+        pixel_array = dicom_file.pixel_array
+        image = (pixel_array / np.max(pixel_array) * 255).astype(np.uint8)
+        metadata = {elem.keyword: elem.value for elem in dicom_file}
+    except Exception as e:
+        LOGGER.error(f"Error reading {filepath}: {e}")
+        sys.exit()
+    
+    return image, metadata
+
+
+def save_medical_image(image: np.ndarray,
+                       data_name: str,
+                       filepath: str,
+                       LOGGER: logging.Logger) -> None:
+
+    try:
+        io.imsave(filepath, image)
+    except Exception as e:
+        LOGGER.error(f"Error saving {data_name} to {filepath}: {e}")
+        sys.exit()
+    
+    return None
+
