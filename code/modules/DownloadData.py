@@ -3,7 +3,6 @@ import os
 import pandas as pd
 from skimage import io
 import logging
-import sys
 
 from code.utils import helpers as hlp
 
@@ -26,7 +25,7 @@ class DownloadData:
         self.clinical2 = self.download_clinical_data('dataset2', 'clinical2.csv')
 
         self.LOGGER.info('Downloading (PET)CT images')
-        self.seg_image_data_dict = self.download_ct_data(segmented=False)
+        self.image_data_dict = self.download_ct_data(segmented=False)
 
         self.LOGGER.info('Downloading (PET)CT segmented images')
         self.seg_image_data_dict = self.download_ct_data(segmented=True)
@@ -89,7 +88,7 @@ class DownloadData:
                 msg = (f"{patient_id} has {len(os.listdir(patient_folder))} "
                        f"subfolders instead of 1. The following error was raised: {e}")
                 self.LOGGER.error(msg)
-                sys.exit()
+                raise(e)
 
             subfolder = os.path.join(patient_folder, os.listdir(patient_folder)[0])
 

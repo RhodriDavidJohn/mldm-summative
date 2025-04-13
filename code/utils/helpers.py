@@ -6,7 +6,6 @@ import pydicom
 from skimage import io
 import logging
 from datetime import datetime
-import sys
 
 
 def setup_logger(run_id: str, folder: str) -> logging.Logger:
@@ -61,7 +60,7 @@ def load_csv(filepath: str, LOGGER: logging.Logger) -> pd.DataFrame:
         LOGGER.info(f"Loaded {filepath} successfully")
     except Exception as e:
         LOGGER.error(f"Error reading {filepath}: {e}")
-        sys.exit()
+        raise(e)
     
     return df
 
@@ -78,7 +77,7 @@ def save_csv(
         LOGGER.info(f'Saved {data_name} to {output_path}')
     except Exception as e:
         logging.error(f"Error saving {data_name} to {output_path}: {e}")
-        sys.exit()
+        raise(e)
     
     return None
 
@@ -91,7 +90,7 @@ def load_dicom(filepath: str, LOGGER: logging.Logger) -> np.ndarray:
         image = (pixel_array / np.max(pixel_array) * 255).astype(np.uint8)
     except Exception as e:
         LOGGER.error(f"Error reading {filepath}: {e}")
-        sys.exit()
+        raise(e)
     
     return image
 
@@ -105,7 +104,7 @@ def save_medical_image(image: np.ndarray,
         io.imsave(filepath, image)
     except Exception as e:
         LOGGER.error(f"Error saving {data_name} to {filepath}: {e}")
-        sys.exit()
+        raise(e)
     
     return None
 
