@@ -1,7 +1,3 @@
-# functions to download the clinical and
-# (PET)CT scan data from shared HPC area
-
-
 # imports
 import os
 import pandas as pd
@@ -29,8 +25,11 @@ class DownloadData:
         self.clinical1 = self.download_clinical_data('dataset1', 'clinical1.csv')
         self.clinical2 = self.download_clinical_data('dataset2', 'clinical2.csv')
 
-        self.LOGGER.info('Downloading (PET)CT segmented images data')
-        self.seg_image_data_dict = self.download_segmented_ct_data()
+        self.LOGGER.info('Downloading (PET)CT images')
+        self.seg_image_data_dict = self.download_ct_data(segmented=False)
+
+        self.LOGGER.info('Downloading (PET)CT segmented images')
+        self.seg_image_data_dict = self.download_ct_data(segmented=True)
 
 
 
@@ -55,10 +54,19 @@ class DownloadData:
         return df
 
 
-    def download_segmented_ct_data(self):
+    def download_ct_data(self, segmented: bool) -> dict:
         """
-        Download the (PET)CT segmented image data from the shared HPC area
+        Download the (PET)CT image data from the shared HPC area
         """
+
+        if segmented:
+            folder_filter = 'Segmentation'
+            image_filename = 'seg_ct_image.png'
+            image_type = 'Segmented image'
+        else:
+            folder_filter = '1.00'
+            image_filename = 'orig_ct_image.png'
+            image_type = 'Image'
 
         image_data_dict = {}
 
@@ -89,33 +97,33 @@ class DownloadData:
 
             # the subfolder should contain 3 more folders
             # but we only want the one with the segmented image
-            for folder in os.listdir(subfolder):
-                if 'Segmentation' in folder:
-                    seg_folder = os.path.join(subfolder, folder)
+            for dir in os.listdir(subfolder):
+                if folder_filter in dir:
+                    folder = os.path.join(subfolder, dir)
                     break
                 
 
             # read the image file
-            assert len(os.listdir(seg_folder))==1
-            assert os.listdir(seg_folder)[0].endswith('.dcm')
+            assert len(os.listdir(folder))==1
+            assert os.listdir(folder)[0].endswith('.dcm')
 
-            seg_file = os.path.join(seg_folder, os.listdir(seg_folder)[0])
-            seg_image = hlp.load_dicom(seg_file, self.LOGGER)
+            file = os.path.join(folder, os.listdir(folder)[0])
+            image = hlp.load_dicom(file, self.LOGGER)
 
 
             # save the image as jpeg
             patient_save_path = os.path.join(output_directory, patient_id)
             if not os.path.exists(patient_save_path):
                 os.makedirs(patient_save_path)
-            image_filename =  f"seg_image_{patient_id}.png"
+            
             image_save_loc = os.path.join(patient_save_path, image_filename)
-            hlp.save_medical_image(seg_image, f"Segmented image for {patient_id}",
+            hlp.save_medical_image(image, f"{image_type} for {patient_id}",
                                    image_save_loc, self.LOGGER)
 
             # populate the data dictionary
-            image_data_dict[patient_id] = seg_image
+            image_data_dict[patient_id] = image
         
-        msg = (f"Downloaded {len(image_data_dict)} segemented images "
+        msg = (f"Downloaded {len(image_data_dict)} {image_type.lower()}s "
                f"and saved to {output_directory}")
         self.LOGGER.info(msg)
         
