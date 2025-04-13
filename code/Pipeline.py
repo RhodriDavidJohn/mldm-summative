@@ -16,10 +16,6 @@ class Pipeline:
     def __init__(self, config: ConfigParser):
         self.config = config
         self.logs_folder = config.get('global', 'logs_folder')
-
-        if not os.path.exists(self.logs_folder):
-            os.makedirs(self.logs_folder)
-        
         self.run_id = hlp.create_run_id(self.logs_folder)
         self.LOGGER = hlp.setup_logger(self.logs_folder, self.run_id)
 
