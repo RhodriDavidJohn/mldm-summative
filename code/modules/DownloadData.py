@@ -100,14 +100,16 @@ class DownloadData:
             image_type_dict = {}
             
             # load the images
-            image_type_dict['seg'] = self.load_images(seg_filepath)
-            image_type_dict['ct'] = self.load_images(ct_filepath)
+            loaded_seg = self.load_images(seg_filepath)
+            loaded_ct = self.load_images(ct_filepath)
+            image_type_dict['seg'] = [img for img, _ in loaded_seg]
+            image_type_dict['ct'] = [img for img, _ in loaded_ct]
 
             # save the images as tif files
             seg_savepath = os.path.join(output_directory, patient_id, 'segmented')
             ct_savepath = os.path.join(output_directory, patient_id, 'ct')
-            self.save_images(image_type_dict['seg'], seg_savepath, patient_id)
-            self.save_images(image_type_dict['ct'], ct_savepath, patient_id)
+            self.save_images(loaded_seg, seg_savepath, patient_id)
+            self.save_images(loaded_ct, ct_savepath, patient_id)
 
             # populate the data dictionary
             image_data_dict[patient_id] = image_type_dict
@@ -146,12 +148,14 @@ class DownloadData:
         """
 
         images = []
+        files = []
         for file in os.listdir(filepath):
             file = os.path.join(filepath, file)
             image = hlp.load_dicom(file, self.LOGGER)
+            files.append(file)
             images.append(image)
         
-        return images
+        return zip(images, files)
     
 
     def save_images(self, images: list, folderpath: str, patient_id: str) -> None:
@@ -162,8 +166,8 @@ class DownloadData:
         if not os.path.exists(folderpath):
             os.makedirs(folderpath)
         
-        for i, image in enumerate(images):
-            image_filename = f"image_{i}.tif"
+        for image, file in images:
+            image_filename = file.replace('.dcm', '.tif')
             image_save_loc = os.path.join(folderpath, image_filename)
             hlp.save_medical_image(image, f"Image for {patient_id}",
                                    image_save_loc, self.LOGGER)
