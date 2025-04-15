@@ -84,6 +84,9 @@ def save_csv(
 
 def load_dicom(filepath: str, LOGGER: logging.Logger) -> np.ndarray:
 
+    import warnings
+    warnings.filterwarnings("ignore", category=UserWarning, module="pydicom")
+    
     try:
         dicom_file = pydicom.dcmread(filepath)
         pixel_array = dicom_file.pixel_array
@@ -108,3 +111,37 @@ def save_medical_image(image: np.ndarray,
     
     return None
 
+
+def calculate_solidarity(region):
+    if region.convex_area > 0:
+        solidity = region.area / region.convex_area
+    else:
+        solidity = 0  
+    return solidity
+
+
+def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Function to clean column names.
+
+    The function removes whitespace and special characters, 
+    converts to lowercase, and makes the names snake_case.
+    """
+
+    df = df.copy()
+
+    # remove whitespace
+    df.columns = df.columns.str.strip()
+
+    # remove special characters
+    df.columns = df.columns.str.replace('.', ' ')
+    df.columns = df.columns.str.replace('[%(),-]', '', regex=True)
+    df.columns = df.columns.str.replace('=', '')
+
+    # converts to lower case
+    df.columns = df.columns.str.lower()
+
+    # make the names snake case
+    df.columns = df.columns.str.replace(' ', '_')
+
+    return df

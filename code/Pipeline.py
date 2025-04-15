@@ -15,9 +15,10 @@ class Pipeline:
 
     def __init__(self, config: ConfigParser):
         self.config = config
-        self.logs_folder = config.get('global', 'logs_folder')
-        self.run_id = hlp.create_run_id(self.logs_folder)
-        self.LOGGER = hlp.setup_logger(self.logs_folder, self.run_id)
+        # set up the logger
+        logs_folder = config.get('global', 'logs_folder')
+        self.run_id = hlp.create_run_id(logs_folder)
+        self.LOGGER = hlp.setup_logger(logs_folder, self.run_id)
 
 
     def run(self):
@@ -33,8 +34,6 @@ class Pipeline:
         if bool(global_config['run_modular']):
             # run the modlar pipeline
             self.LOGGER.info('Running the modular pipeline')
-            self.modular_config = ConfigParser()
-            self.modular_config.read(global_config['modular_config_path'])
             self.modular_pipeline(module=global_config['module'])
         else:
             # run the main pipeline
@@ -96,7 +95,7 @@ class Pipeline:
         # run specified module
         if module == 'download':
             self.LOGGER.info('Running the data download module')
-            dd = DownloadData(config=self.modular_config['download_data'], logger=self.LOGGER)
+            dd = DownloadData(config=self.config['download_data'], logger=self.LOGGER)
             dd.download_data()
 
         elif module == 'process':
