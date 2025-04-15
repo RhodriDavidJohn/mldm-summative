@@ -6,7 +6,7 @@
 #SBATCH --partition=teach_cpu
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=0:30:0
+#SBATCH --time=1:30:0
 #SBATCH --mem=1G
 #SBATCH --account=SSCM033324
 
