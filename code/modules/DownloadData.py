@@ -147,9 +147,10 @@ class DownloadData:
         Load the images from the given filepath
         """
 
+        image_filepaths = sorted(os.listdir(folderpath))
         images = []
         files = []
-        for file in os.listdir(folderpath):
+        for file in image_filepaths:
             filepath = os.path.join(folderpath, file)
             image = hlp.load_dicom(filepath, self.LOGGER)
             files.append(file)
