@@ -8,11 +8,10 @@ import logging
 from datetime import datetime
 
 
-def setup_logger(run_id: str, folder: str) -> logging.Logger:
+def setup_logger(folder: str, run_id: str) -> logging.Logger:
     
     logging_file = os.path.join(folder, f"{run_id}.log")
-    os.makedirs(os.path.dirname(logging_file), exist_ok=True)
-
+    
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%d-%m-%Y %H:%M:%S',
@@ -38,7 +37,7 @@ def create_run_id(folder: str) -> str:
     date = datetime.now().strftime("%Y-%m-%d") + "_"
 
     try:
-        prev_id = os.listdir(folder)[0]
+        prev_id = sorted(os.listdir(folder))[-1]
         prev_date = prev_id[0:11]
         if prev_date == date:
             run_id = int(prev_id[-6:-4]) + 1
@@ -107,6 +106,8 @@ def save_medical_image(image: np.ndarray,
     warnings.filterwarnings("ignore", category=UserWarning, module="skimage")
 
     try:
+        if not os.path.exists(os.path.dirname(filepath)):
+            os.makedirs(os.path.dirname(filepath))
         io.imsave(filepath, image)
     except Exception as e:
         LOGGER.error(f"Error saving {data_name} to {filepath}: {e}")
@@ -148,3 +149,61 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     df.columns = df.columns.str.replace(' ', '_')
 
     return df
+
+
+def load_slices(images_folder: str) -> dict:
+    """
+    Load slices from a folder and return them as a list of numpy arrays within a dictionairy.
+    """
+
+    patient_ids = sorted(os.listdir(images_folder))
+    slices_dict = {}
+    for patient in patient_ids:
+        slice_folder = os.path.join(images_folder, patient, 'ct')
+        slice_files = sorted(os.listdir(slice_folder))
+        slices = [io.imread(os.path.join(slice_folder, file)) for file in slice_files]
+        slices_dict[patient] = slices
+
+    return slices_dict
+
+
+def create_3d_image(slices: list) -> np.ndarray:
+    """
+    Stack slices to create a 3D image.
+    """
+    return np.stack(slices, axis=0)
+
+
+def calculate_glcm2(img, mask, nbins):
+    out = np.zeros((nbins,nbins,13))
+    offsets = [(1, 0, 0),
+                       (0, 1, 0),
+                       (0, 0, 1),
+                       (1, 1, 0),
+                       (-1, 1, 0),
+                       (1, 0, 1),
+                       (-1, 0, 1),
+                       (0, 1, 1),
+                       (0, -1, 1),
+                       (1, 1, 1),
+                       (-1, 1, 1),
+                       (1, -1, 1),
+                       (1, 1, -1)
+                       ]
+    matrix = np.array(img)
+    matrix[mask <= 0] = nbins
+    s= matrix.shape
+
+    bins = np.arange(0,nbins+1)
+
+    for i,offset in  enumerate(offsets):
+
+        matrix1 = np.ravel(matrix[max(offset[0],0):s[0]+min(offset[0],0),max(offset[1],0):s[1]+min(offset[1],0),
+                  max(offset[2],0):s[2]+min(offset[2],0)])
+
+        matrix2 = np.ravel(matrix[max(-offset[0], 0):s[0]+min(-offset[0], 0), max(-offset[1], 0):s[1]+min(-offset[1], 0),
+                  max(-offset[2], 0):s[2]+min(-offset[2], 0)])
+
+
+        out[:,:,i] = np.histogram2d(matrix1,matrix2,bins=bins)[0]
+    return out
