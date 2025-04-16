@@ -86,7 +86,7 @@ def load_dicom(filepath: str, LOGGER: logging.Logger) -> np.ndarray:
 
     import warnings
     warnings.filterwarnings("ignore", category=UserWarning, module="pydicom")
-    
+
     try:
         dicom_file = pydicom.dcmread(filepath)
         pixel_array = dicom_file.pixel_array
@@ -102,6 +102,9 @@ def save_medical_image(image: np.ndarray,
                        data_name: str,
                        filepath: str,
                        LOGGER: logging.Logger) -> None:
+    
+    import warnings
+    warnings.filterwarnings("ignore", category=UserWarning, module="skimage")
 
     try:
         io.imsave(filepath, image)

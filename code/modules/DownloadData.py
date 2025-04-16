@@ -142,20 +142,20 @@ class DownloadData:
         return os.path.join(self.input_path, dataset, filepath)
     
 
-    def load_images(self, filepath: str) -> list:
+    def load_images(self, folderpath: str) -> list:
         """
         Load the images from the given filepath
         """
 
         images = []
         files = []
-        for file in os.listdir(filepath):
-            file = os.path.join(filepath, file)
-            image = hlp.load_dicom(file, self.LOGGER)
+        for file in os.listdir(folderpath):
+            filepath = os.path.join(folderpath, file)
+            image = hlp.load_dicom(filepath, self.LOGGER)
             files.append(file)
             images.append(image)
         
-        return zip(images, files)
+        return list(zip(images, files))
     
 
     def save_images(self, images: list, folderpath: str, patient_id: str) -> None:
