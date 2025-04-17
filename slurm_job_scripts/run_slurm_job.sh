@@ -4,9 +4,9 @@
 #SBATCH --output=./slurm_logs/output.txt
 #SBATCH --error=./slurm_logs/output.txt
 #SBATCH --partition=teach_cpu
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --time=1:30:0
+#SBATCH --nodes=4
+#SBATCH --ntasks-per-node=4
+#SBATCH --time=2:0:0
 #SBATCH --mem=1G
 #SBATCH --account=SSCM033324
 
