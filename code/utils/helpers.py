@@ -140,7 +140,7 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     # remove special characters
     df.columns = df.columns.str.replace('.', ' ')
     df.columns = df.columns.str.replace('[%(),-]', '', regex=True)
-    df.columns = df.columns.str.replace('=', '')
+    df.columns = df.columns.str.replace('choice=', '')
 
     # converts to lower case
     df.columns = df.columns.str.lower()
