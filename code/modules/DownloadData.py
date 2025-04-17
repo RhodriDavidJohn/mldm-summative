@@ -1,7 +1,7 @@
 # imports
 import os
 import pandas as pd
-from skimage import io
+from joblib import Parallel, delayed
 import logging
 
 from code.utils import helpers as hlp
@@ -86,38 +86,54 @@ class DownloadData:
         meta2['Dataset'] = 'dataset2'
         metadata = pd.concat([meta1, meta2], axis=0)
 
+        self.joined_metadata = metadata.copy()
+
         seg_ids = metadata.loc[metadata['Modality']=='SEG', 'Subject ID'].unique().tolist()
 
         image_data_dict = {}
+        image_dict_list = Parallel(n_jobs=-1)(delayed(self.get_images)(patient_id) for patient_id in seg_ids)
+
+        for dictionary in image_dict_list:
+            for patient_id, images in dictionary.items():
+                image_data_dict[patient_id] = images
 
         output_directory = os.path.join(self.output_path, 'images')
-
-        for patient_id in seg_ids:
-
-            seg_filepath = self.get_image_filepath(metadata, patient_id, 'SEG')
-            ct_filepath = self.get_image_filepath(metadata, patient_id, 'CT')
-            
-            image_type_dict = {}
-            
-            # load the images
-            loaded_seg = self.load_images(seg_filepath)
-            loaded_ct = self.load_images(ct_filepath)
-            image_type_dict['seg'] = [img for img, _ in loaded_seg]
-            image_type_dict['ct'] = [img for img, _ in loaded_ct]
-
-            # save the images as tif files
-            seg_savepath = os.path.join(output_directory, patient_id, 'segmented')
-            ct_savepath = os.path.join(output_directory, patient_id, 'ct')
-            self.save_images(loaded_seg, seg_savepath, patient_id)
-            self.save_images(loaded_ct, ct_savepath, patient_id)
-
-            # populate the data dictionary
-            image_data_dict[patient_id] = image_type_dict
-        
         msg = (f"Downloaded images for {len(image_data_dict)} patients "
                f"and saved to {output_directory}")
         self.LOGGER.info(msg)
         
+        return image_data_dict
+    
+
+    def get_images(self, patient_id: str) -> dict:
+        """
+        Function to allow loading and saving of each patients images
+        to happen in parallel
+        """
+
+        image_data_dict = {}
+        output_directory = os.path.join(self.output_path, 'images')
+
+        seg_filepath = self.get_image_filepath(self.joined_metadata, patient_id, 'SEG')
+        ct_filepath = self.get_image_filepath(self.joined_metadata, patient_id, 'CT')
+        
+        image_type_dict = {}
+        
+        # load the images
+        loaded_seg = self.load_images(seg_filepath)
+        loaded_ct = self.load_images(ct_filepath)
+        image_type_dict['seg'] = [img for img, _ in loaded_seg]
+        image_type_dict['ct'] = [img for img, _ in loaded_ct]
+
+        # save the images as tif files
+        seg_savepath = os.path.join(output_directory, patient_id, 'segmented')
+        ct_savepath = os.path.join(output_directory, patient_id, 'ct')
+        self.save_images(loaded_seg, seg_savepath, patient_id)
+        self.save_images(loaded_ct, ct_savepath, patient_id)
+
+        # populate the data dictionary
+        image_data_dict[patient_id] = image_type_dict
+
         return image_data_dict
 
 
