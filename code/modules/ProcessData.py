@@ -327,6 +327,11 @@ class ProcessData:
         
         self.LOGGER.info("Tumour features extracted successfully")
 
+        # join the clinical data to get the outcome for each patient
+        clinical = self.clinical_joined.copy()
+        clinical_out = clinical[['patient_id', 'death_2years']]
+        df = df.merge(right=clinical_out, on='patient_id', how='left')
+
         # save the tumour features to the clean data folder
         output_filepath = os.path.join(self.output_path, 'tumour_features.csv')
         hlp.save_csv(df, "tumour features", output_filepath, self.LOGGER)
