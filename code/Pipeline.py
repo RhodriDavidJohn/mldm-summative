@@ -69,7 +69,7 @@ class Pipeline:
         self.LOGGER.info('Running the main pipeline')
 
         # download the data
-        dd = DownloadData(config=self.config['data_download'], logger=self.LOGGER)
+        dd = DownloadData(config=self.config['download_data'], logger=self.LOGGER)
         dd.download_data()
 
         # process the data
