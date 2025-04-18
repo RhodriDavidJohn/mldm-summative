@@ -2,6 +2,7 @@
 import os
 import pandas as pd
 import numpy as np
+import joblib
 import pydicom
 from skimage import io
 import logging
@@ -207,3 +208,24 @@ def calculate_glcm2(img, mask, nbins):
 
         out[:,:,i] = np.histogram2d(matrix1,matrix2,bins=bins)[0]
     return out
+
+
+def save_ml_model(model, model_name: str, data_name: str,
+                  output_path: str, LOGGER: logging.Logger) -> None:
+
+    save_loc = os.path.join(output_path, f"{data_name}_{model_name}_model.pkl")
+
+    try:
+        joblib.dump(model, save_loc)
+        msg = (f"The {model_name} model trained on the "
+               f"{data_name.replace('_', ' ')} data saved successfully to "
+               f"{save_loc}")
+        LOGGER.info(msg)
+    except Exception as e:
+        msg = (f"Error saving the {model_name} model "
+               f"trained on the {data_name.replace('_', ' ')} data to"
+               f"{save_loc}: {e}")
+        LOGGER.error(msg)
+        raise(e)
+    
+    return None

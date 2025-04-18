@@ -11,6 +11,7 @@ from code.utils import helpers as hlp
 
 from code.modules.DownloadData import DownloadData
 from code.modules.ProcessData import ProcessData
+from code.modules.TrainModels import TrainModels
 
 
 class Pipeline:
@@ -79,6 +80,11 @@ class Pipeline:
         processer.process_data()
 
         # train the models
+        training = TrainModels(self.config['model_development'], self.LOGGER,
+                               processer.clinical1_clean, processer.clinical2_clean,
+                               processer.clinical_joined, processer.image_features_df,
+                               processer.full_data)
+        training.train_models()
 
 
         # evaluate the models
