@@ -171,8 +171,7 @@ class ProcessData:
         }
 
         binary_value_replacement = {
-            'yes': 1, 'no': 0, 'mutant': 1, 'translocated': 1, 'wildtype': 0, 'dead': 1, 'alive': 0,
-            'checked': 1, 'unchecked': 0, 'present': 1, 'absent': 0
+            'dead': 1, 'alive': 0
         }
 
         gg_replacement = {
