@@ -35,7 +35,13 @@ class Pipeline:
 
         global_config = self.config['global']
 
-        if bool(global_config['run_modular']):
+        try:
+            assert global_config['run_modular'] in ['True', 'False']
+        except Exception as e:
+            self.LOGGER.error("Config option 'run_modular' must be set to either True or False.")
+            raise(e)
+
+        if global_config['run_modular']=='True':
             # run the modlar pipeline
             self.modular_pipeline(module=global_config['module'])
         else:
