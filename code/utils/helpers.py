@@ -229,3 +229,16 @@ def save_ml_model(model, model_name: str, data_name: str,
         raise(e)
     
     return None
+
+
+def get_metadata() -> pd.DataFrame:
+
+    meta1 = load_csv("data/metadata1.csv")
+    meta2 = load_csv("data/metadata2.csv")
+
+    meta1['Dataset'] = "dataset1"
+    meta2['Dataset'] = "dataset2"
+
+    metadata = pd.concat([meta1, meta2], axis=0)
+
+    return metadata
