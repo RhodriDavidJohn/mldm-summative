@@ -13,10 +13,10 @@ def train_models(data_name: str, k_folds: int,
     input_dir = 'data/clean'
 
     data_path_dict = {
-        'clinical1': os.path.join(input_dir, 'clinical1.csv'),
+        **{'clinical1': os.path.join(input_dir, 'clinical1.csv'),
         'clinical2': os.path.join(input_dir, 'clinical2.csv'),
-        'clinical_joined': os.path.join(input_dir, 'clinical_joined.csv'),
-        'image_features_{i}': os.path.join(input_dir, 'image_features_{i}.csv') for i in range(1, n_batches+1)
+        'clinical_joined': os.path.join(input_dir, 'clinical_joined.csv')},
+        **{f'image_features_{i}': os.path.join(input_dir, 'image_features_{i}.csv') for i in range(1, n_batches+1)}
     }
 
     image_features_list = []
