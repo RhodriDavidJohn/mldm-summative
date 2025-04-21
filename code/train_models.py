@@ -110,8 +110,8 @@ def train_models(data_name: str, k_folds: int,
 
 if __name__=="__main__":
     data_name = argv[0]
-    seed = argv[1]
-    k_folds = argv[2]
-    n_batches = argv[3]
+    seed = int(argv[1])
+    k_folds = int(argv[2])
+    n_batches = int(argv[3])
 
     train_models(data_name, k_folds, seed, n_batches)

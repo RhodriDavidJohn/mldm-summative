@@ -148,7 +148,7 @@ def save_ml_model(model, model_name: str, data_name: str,
 
 def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tuple:
 
-    X = data.drop(columns=['patient_id', 'death_2years']).copy()
+    X = data.drop(columns=['death_2years']).copy()
     y = data['death_2years'].copy()
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -157,6 +157,9 @@ def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tup
 
     train_data = X_train.join(y_train)
     test_data = X_test.join(y_test)
+
+    X_train = X_train.drop("patient_id", axis=1)
+    X_test = X_test.drop("patient_id", axis=1)
 
     train_data_msg = f"taining data for {data_name.replace('_', ' ')}"
     test_data_msg = f"testing data for {data_name.replace('_', ' ')}"
