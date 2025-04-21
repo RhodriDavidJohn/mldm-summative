@@ -3,8 +3,8 @@ import os
 import pandas as pd
 from sys import argv
 
-from code.utils.model_development import *
-from code.utils import helpers2 as hlp
+from utils.model_development import *
+from utils import helpers2 as hlp
 
 
 def train_models(data_name: str, k_folds: int,

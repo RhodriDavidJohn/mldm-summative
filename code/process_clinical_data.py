@@ -2,8 +2,8 @@
 import os
 import pandas as pd
 
-from code.utils.clinical_processing import *
-from code.utils import helpers2 as hlp
+from utils.clinical_processing import *
+from utils import helpers2 as hlp
 
 
 
@@ -13,7 +13,7 @@ def process_clinical_data() -> None:
     clinical1_path = os.path.join(base_dir, 'dataset1', 'clinical1.csv')
     clinical2_path = os.path.join(base_dir, 'dataset2', 'clinical2.csv')
 
-    cleaned_clinical1 = process_clinical_data(clinical1_path)
+    cleaned_clinical1 = process_clinical1_data(clinical1_path)
     cleaned_clinical2 = process_clinical2_data(clinical2_path)
 
     clinical_joined = pd.concat([cleaned_clinical1, cleaned_clinical2], axis=0)

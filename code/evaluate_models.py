@@ -4,8 +4,8 @@ import pandas as pd
 import joblib
 from sys import argv
 
-from code.utils import helpers2 as hlp
-from code.utils.model_evaluation import *
+from utils import helpers2 as hlp
+from utils.model_evaluation import *
 
 
 

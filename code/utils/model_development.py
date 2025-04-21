@@ -12,7 +12,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 import joblib
 
-from code.utils import helpers2 as hlp
+from utils import helpers2 as hlp
 
 
 def pre_processing_pipeline(df: pd.DataFrame, mixed_cols: bool) -> Pipeline:
