@@ -2,6 +2,7 @@
 import os
 import pandas as pd
 import numpy as np
+import pydicom
 from skimage.measure import label, marching_cubes, mesh_surface_area
 from scipy.spatial.distance import  pdist
 from scipy.ndimage import zoom
@@ -24,6 +25,7 @@ def get_image_filepath(df: pd.DataFrame, patient_id: str, image_type: str) -> st
             )
             return value
 
+        base_dir = '/user/home/ms13525/scratch/mshds-ml-data-2025'
         dataset = access_dataframe_value('Dataset')
         filepath = access_dataframe_value('File Location')
 
@@ -56,7 +58,7 @@ def load_image_list(folderpath: str) -> list:
     images = []
     for file in image_filepaths:
         filepath = os.path.join(folderpath, file)
-        image = load_dicom(filepath, self.LOGGER)
+        image = load_dicom(filepath)
         images.append(image)
         del image
     
