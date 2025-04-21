@@ -16,7 +16,7 @@ def train_models(data_name: str, k_folds: int,
         **{'clinical1': os.path.join(input_dir, 'clinical1.csv'),
         'clinical2': os.path.join(input_dir, 'clinical2.csv'),
         'clinical_joined': os.path.join(input_dir, 'clinical_joined.csv')},
-        **{f'image_features_{i}': os.path.join(input_dir, 'image_features_{i}.csv') for i in range(1, n_batches+1)}
+        **{f'image_features_{i}': os.path.join(input_dir, f'image_features_{i}.csv') for i in range(1, n_batches+1)}
     }
 
     image_features_list = []
@@ -36,7 +36,7 @@ def train_models(data_name: str, k_folds: int,
 
     data_dict['full_data'] = (
         data_dict['clinical_joined']
-        .merge(right=data_dict['image_features'].drop('death_2years'),
+        .merge(right=data_dict['image_features'].drop('death_2years', axis=1),
                on='patient_id',
                how='left')
     )
@@ -84,7 +84,7 @@ def train_models(data_name: str, k_folds: int,
 
     # train the MLP model
     mlp_model = MLPClassifier(activation='relu', solver='adam',
-                              random_state=self.random_seed)
+                              random_state=random_seed)
     mlp_params = {
         "mlp__hidden_layer_sizes": [(100,), (100,50), (100,50,50), (100,50,25)],
         "mlp__alpha": [0.001, 0.01, 0.1],

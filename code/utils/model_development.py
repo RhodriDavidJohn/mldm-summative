@@ -26,12 +26,14 @@ def pre_processing_pipeline(df: pd.DataFrame, mixed_cols: bool) -> Pipeline:
     if mixed_cols:
 
         ordinal_cols = [
-            'gg_percentage',
             'clinical_t_stage',
             'clinical_n_stage',
             'clinical_m_stage',
             'overall_stage'
         ]
+
+        if 'gg_percentage' in df.columns:
+            ordinal_cols.append('gg_percentage')
 
         categorical_cols = [col for col in df.columns if df[col].dtype=='object']
         numerical_cols = [col for col in df.columns
@@ -70,7 +72,7 @@ def model_development(model_type: str, model, params: dict, k_folds: int,
     """
 
     # logic to choose what columns need pre processing
-    if data_name=='image_feaures':
+    if data_name=='image_features':
         mixed_cols = False
     else:
         mixed_cols = True
