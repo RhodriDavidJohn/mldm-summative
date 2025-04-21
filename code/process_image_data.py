@@ -29,7 +29,7 @@ def process_images(batch: list, save_loc: str) -> None:
 
         # process the data
         features = extract_tumour_properties(img=image_dict['ct'], mask=image_dict['seg'])
-        data.append(features)
+        data.append([patient_id] + features)
     
     columns = (["patient_id"] +
                ["n_tumours", "maximum_diameter", "surface_area", # segmented features

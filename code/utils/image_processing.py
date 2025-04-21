@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import pydicom
 from skimage.measure import label, marching_cubes, mesh_surface_area
+from skimage.feature import greycomatrix, greycoprops
 from scipy.spatial.distance import  pdist
 from scipy.ndimage import zoom
 
@@ -121,23 +122,24 @@ def segmentation_features(tumour_array: np.ndarray, voxel_size: list) -> dict:
 
 def calculate_glcm2(img, mask, nbins):
 
-    out = np.zeros((nbins,nbins,13))
     offsets = [(1, 0, 0),
-                       (0, 1, 0),
-                       (0, 0, 1),
-                       (1, 1, 0),
-                       (-1, 1, 0),
-                       (1, 0, 1),
-                       (-1, 0, 1),
-                       (0, 1, 1),
-                       (0, -1, 1),
-                       (1, 1, 1),
-                       (-1, 1, 1),
-                       (1, -1, 1),
-                       (1, 1, -1)
-                       ]
+               (0, 1, 0),
+               (0, 0, 1),
+               (1, 1, 0),
+               (-1, 1, 0),
+               (1, 0, 1),
+               (-1, 0, 1),
+               (0, 1, 1),
+               (0, -1, 1),
+               (1, 1, 1),
+               (-1, 1, 1),
+               (1, -1, 1),
+               (1, 1, -1)]
+
+    out = np.zeros((nbins, nbins, len(offsets)))
+    
     matrix = np.array(img)
-    matrix[mask <= 0] = nbins
+    matrix[mask <= 0] = nbins - 1
     s= matrix.shape
 
     bins = np.arange(0,nbins+1)
@@ -229,6 +231,61 @@ def gray_level_cooccurrence_features(img: np.ndarray, mask: np.ndarray) -> dict:
                 }
 
     return features
+
+
+
+
+def get_glcm_features_3d(image: np.ndarray, mask: np.ndarray, distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4]) -> dict:
+    """
+    Calculate GLCM features for a 3D image within a masked region.
+
+    Parameters:
+    - image: np.ndarray, the 3D grayscale image.
+    - mask: np.ndarray, the binary mask (same shape as image) where features are calculated.
+    - distances: list, pixel pair distances for GLCM calculation.
+    - angles: list, angles (in radians) for GLCM calculation.
+
+    Returns:
+    - dict: A dictionary containing GLCM features (contrast, dissimilarity, homogeneity, energy, correlation).
+    """
+    # Apply the mask to the image
+    masked_image = image * (mask > 0)
+
+    # Normalize the image to have integer values (required for GLCM)
+    normalized_image = ((masked_image - masked_image.min()) / (masked_image.max() - masked_image.min()) * 255).astype(np.uint8)
+
+    # Initialize GLCM features
+    features = {
+        "contrast": 0,
+        "correlation": 0,
+        "dissimilarity": 0,
+        "homogeneity": 0,
+        #"energy": 0
+    }
+
+    # Iterate through each slice of the 3D image
+    for i in range(normalized_image.shape[0]):
+        slice_image = normalized_image[i, :, :]
+        slice_mask = mask[i, :, :]
+
+        # Skip slices without any mask
+        if np.sum(slice_mask) == 0:
+            continue
+
+        # Compute GLCM for the slice
+        glcm = greycomatrix(slice_image, distances=distances, angles=angles, levels=256, symmetric=True, normed=True)
+
+        # Accumulate GLCM features
+        for feature in features.keys():
+            features[feature] += np.mean(greycoprops(glcm, feature))
+
+    # Average the features over all slices
+    num_slices = np.sum([np.sum(mask[i, :, :]) > 0 for i in range(mask.shape[0])])
+    if num_slices > 0:
+        for feature in features.keys():
+            features[feature] /= num_slices
+
+    return features
     
 
 def intensity_features(img: np.ndarray, mask: np.ndarray) -> dict:
@@ -260,10 +317,11 @@ def extract_tumour_properties(img: np.ndarray, mask: np.ndarray) -> list:
     mask = zoom(mask, (0.5, 0.5, 0.5), order=1)
 
     # extract features from the grayscale image
-    glcm_features = gray_level_cooccurrence_features(img, mask)
+    #glcm_features = gray_level_cooccurrence_features(img.copy(), mask.copy())
+    glcm_features = get_glcm_features_3d(img.copy(), mask.copy())
 
     # extract features from both the grayscale and the segmented images
-    intensity_feats = intensity_features(img, mask)
+    intensity_feats = intensity_features(img.copy(), mask.copy())
 
     features = (list(segmented_features.values())
                 + list(intensity_feats.values())
