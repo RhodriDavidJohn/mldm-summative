@@ -14,11 +14,9 @@ def load_csv(filepath: str, surpress_messages: bool = False) -> pd.DataFrame:
     try:
         df = pd.read_csv(filepath)
         if not surpress_messages:
-            print(f'Saved {data_name} to {output_path}')
             print(f"Loaded {filepath} successfully")
     except Exception as e:
         if not surpress_messages:
-            print(f'Saved {data_name} to {output_path}')
             print(f"Error reading {filepath}: {e}")
         raise(e)
     
