@@ -21,7 +21,7 @@ def process_images(batch: list, save_loc: str) -> None:
         image_list_dict = load_images(patient_id)
 
         image_dict = {
-            'seg': image_list_dict['seg'][0]
+            'seg': image_list_dict['seg'][0],
             'ct': create_3d_image(image_list_dict['ct'])
         }
 
