@@ -44,5 +44,5 @@ def evaluate_models(data_name: str) -> None:
 
 
 if __name__=="__main__":
-    data_name = argv[0]
+    data_name = argv[1]
     evaluate_models(data_name)

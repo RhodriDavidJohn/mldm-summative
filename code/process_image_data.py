@@ -52,8 +52,8 @@ def process_images(batch: list, save_loc: str) -> None:
 
 
 if __name__=="__main__":
-    batch_num = int(argv[0])
-    batch = argv[1].split(',')
+    batch_num = int(argv[1])
+    batch = argv[2].split(',')
 
     save_loc = f"data/clean/image_features_{batch_num}.csv"
 
