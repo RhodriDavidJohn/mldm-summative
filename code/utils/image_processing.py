@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import pydicom
 from skimage.measure import label, marching_cubes, mesh_surface_area
-from skimage.feature import greycomatrix, greycoprops
+from skimage.feature import graycomatrix, graycoprops
 from scipy.spatial.distance import  pdist
 from scipy.ndimage import zoom
 
@@ -235,7 +235,10 @@ def gray_level_cooccurrence_features(img: np.ndarray, mask: np.ndarray) -> dict:
 
 
 
-def get_glcm_features_3d(image: np.ndarray, mask: np.ndarray, distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4]) -> dict:
+def get_glcm_features_3d(image: np.ndarray,
+                         mask: np.ndarray,
+                         distances=[1],
+                         angles=[0, np.pi/4, np.pi/2, 3*np.pi/4]) -> dict:
     """
     Calculate GLCM features for a 3D image within a masked region.
 
@@ -273,11 +276,12 @@ def get_glcm_features_3d(image: np.ndarray, mask: np.ndarray, distances=[1], ang
             continue
 
         # Compute GLCM for the slice
-        glcm = greycomatrix(slice_image, distances=distances, angles=angles, levels=256, symmetric=True, normed=True)
+        glcm = graycomatrix(slice_image, distances=distances, angles=angles,
+                            levels=256, symmetric=True, normed=True)
 
         # Accumulate GLCM features
         for feature in features.keys():
-            features[feature] += np.mean(greycoprops(glcm, feature))
+            features[feature] += np.mean(graycoprops(glcm, feature))
 
     # Average the features over all slices
     num_slices = np.sum([np.sum(mask[i, :, :]) > 0 for i in range(mask.shape[0])])
