@@ -21,13 +21,13 @@ def process_clinical_data() -> None:
     # mark null categorical values as unknown or not_applicable
     # for variables that are in one of the datasets but not the other
     cols_to_mark_unkown = ['affiliation', 'smoking_status', 'ethnicity']
-    df[cols_to_mark_unkown] = df[cols_to_mark_unkown].fillna('unknown')
+    clinical_joined[cols_to_mark_unkown] = clinical_joined[cols_to_mark_unkown].fillna('unknown')
 
-    df['pack_years'] = df['pack_years'].fillna(-1)
+    clinical_joined['pack_years'] = clinical_joined['pack_years'].fillna(-1)
 
     # save the joined dataset
-    output_path = os.path.join(self.output_path, 'clinical_joined.csv')
-    hlp.save_csv(df, 'joined clinical data', output_path, self.LOGGER)
+    output_path = 'data/clean/clinical_joined.csv'
+    hlp.save_csv(df, 'joined clinical data', output_path)
 
     return None
 
