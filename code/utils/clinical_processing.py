@@ -145,8 +145,8 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
                         else df.loc[i, 'pack_years'] for i in range(len(df))]
         
     missing_value_replacement = {
-        'notassessed': np.nan, 'not recorded in database': np.nan,
-        'notcollected': np.nan, 'unknown': np.nan
+        'not assessed': np.nan, 'not recorded in database': np.nan,
+        'not collected': np.nan, 'unknown': np.nan
     }
 
     binary_value_replacement = {
