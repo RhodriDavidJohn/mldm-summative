@@ -132,6 +132,12 @@ rule clean:
     else
       echo directory code/clean does not exist
     fi
+    if [ -d data/models ]; then
+      echo "Removing directory data/models"
+      rm -r data/models
+    else
+      echo directory code/models does not exist
+    fi
     if [ -d results ]; then
       echo "Removing directory results"
       rm -r results
