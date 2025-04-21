@@ -10,6 +10,7 @@ from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import make_scorer, roc_auc_score
 import joblib
 
 from utils import helpers2 as hlp
@@ -85,10 +86,11 @@ def model_development(model_type: str, model, params: dict, k_folds: int,
     ])
 
     # initiate gridsearchcv object
+    auc_scorer = make_scorer(roc_auc_score, needs_proba=True)
     pipe_cv = GridSearchCV(
         pipe,
         params,
-        scoring='roc_auc',
+        scoring=auc_scorer,
         refit=True,
         cv=k_folds,
         n_jobs=-1,
@@ -109,7 +111,7 @@ def model_development(model_type: str, model, params: dict, k_folds: int,
 
         msg = (f"The cross validation process for the {model_type} model "
                f"trained on the {data_name.replace('_', ' ')} data "
-               f"took {hours} hrs {minutes} mins {seconds} secs.")
+               f"took {round(hours, 0)} hrs {round(minutes,0)} mins {round(seconds, 0)} secs.")
         print(msg)
     except Exception as e:
         msg = (f"An error occured while training the {model_type} model "
