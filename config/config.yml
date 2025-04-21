@@ -1,3 +1,5 @@
+n_batches: 12
+
 model_data: 
     - clinical1
     - clinical2
