@@ -130,18 +130,16 @@ def model_development(model_type: str, model, params: dict, k_folds: int,
 def save_ml_model(model, model_name: str, data_name: str,
                   output_path: str) -> None:
 
-    save_loc = os.path.join(output_path, f"{data_name}_{model_name}_model.pkl")
-
     try:
-        joblib.dump(model, save_loc)
+        joblib.dump(model, output_path)
         msg = (f"The {model_name} model trained on the "
                f"{data_name.replace('_', ' ')} data saved successfully to "
-               f"{save_loc}")
+               f"{output_path}")
         print(msg)
     except Exception as e:
         msg = (f"Error saving the {model_name} model "
-               f"trained on the {data_name.replace('_', ' ')} data to"
-               f"{save_loc}: {e}")
+               f"trained on the {data_name.replace('_', ' ')} data to "
+               f"{output_path}: {e}")
         print(msg)
         raise(e)
     

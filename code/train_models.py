@@ -78,7 +78,7 @@ def train_models(data_name: str, k_folds: int,
             model_data, data_name
         )
     
-    lreg_save_loc = f"results/models/lreg_{data_name}_model.pk"
+    lreg_save_loc = f"results/models/lreg_{data_name}_model.pkl"
     save_ml_model(lreg_model, "lreg", data_name, lreg_save_loc)
 
 
@@ -102,7 +102,7 @@ def train_models(data_name: str, k_folds: int,
         model_data, data_name
     )
 
-    mlp_save_loc = f"results/models/mlp_{data_name}_model.pk"
+    mlp_save_loc = f"results/models/mlp_{data_name}_model.pkl"
     save_ml_model(mlp_model, "mlp", data_name, mlp_save_loc)
 
     return None
