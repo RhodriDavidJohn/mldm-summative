@@ -89,7 +89,7 @@ def process_clinical1_data(filepath) -> pd.DataFrame:
     df.drop(columns=drop_cols, inplace=True)
 
     # save cleaned dataset
-    output_path = 'data/clean/clinical1_clean.csv'
+    output_path = 'data/clean/clinical1.csv'
     hlp.save_csv(df, 'cleaned clinical1 data', output_path)
 
     return df
@@ -228,7 +228,7 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
     df.drop(columns=drop_cols, inplace=True)
 
     # save cleaned dataset
-    output_path = 'data/clean/clinical2_clean.csv'
+    output_path = 'data/clean/clinical2.csv'
     hlp.save_csv(df, 'cleaned clinical2 data', output_path)
 
     return df
