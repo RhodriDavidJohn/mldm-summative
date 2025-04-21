@@ -10,6 +10,8 @@ configfile: "config/config.yml"
 # segmented images
 metadata = get_metadata(surpress_messages=True)
 seg_ids = metadata.loc[metadata['Modality']=='SEG', 'Subject ID'].unique().tolist()
+seg_ids = [id_ for id_ in seg_ids
+           if len(metadata[(metadata['Subject ID']==id_)&(metadata['Modality']=='CT')])==1]
 
 # create batches of patient_ids to
 # process image data in parallel
