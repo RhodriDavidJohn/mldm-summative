@@ -263,10 +263,10 @@ def extract_tumour_properties(img: np.ndarray, mask: np.ndarray) -> list:
     glcm_features = gray_level_cooccurrence_features(img, mask)
 
     # extract features from both the grayscale and the segmented images
-    intensity_features = intensity_features(img, mask)
+    intensity_feats = intensity_features(img, mask)
 
     features = (list(segmented_features.values())
-                + list(intensity_features.values())
+                + list(intensity_feats.values())
                 + list(glcm_features.values()))
 
     return features
