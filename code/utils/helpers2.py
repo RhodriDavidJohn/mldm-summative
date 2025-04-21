@@ -9,13 +9,17 @@ import logging
 from datetime import datetime
 
 
-def load_csv(filepath: str) -> pd.DataFrame:
+def load_csv(filepath: str, surpress_messages: bool = False) -> pd.DataFrame:
 
     try:
         df = pd.read_csv(filepath)
-        print(f"Loaded {filepath} successfully")
+        if not surpress_messages:
+            print(f'Saved {data_name} to {output_path}')
+            print(f"Loaded {filepath} successfully")
     except Exception as e:
-        print(f"Error reading {filepath}: {e}")
+        if not surpress_messages:
+            print(f'Saved {data_name} to {output_path}')
+            print(f"Error reading {filepath}: {e}")
         raise(e)
     
     return df
@@ -24,23 +28,27 @@ def load_csv(filepath: str) -> pd.DataFrame:
 def save_csv(
         df: pd.DataFrame,
         data_name: str,
-        output_path: str
+        output_path: str,
+        surpress_messages: bool = False
     ) -> None:
 
     try:
         df.to_csv(output_path, index=False)
-        print(f'Saved {data_name} to {output_path}')
+        if not surpress_messages:
+            print(f'Saved {data_name} to {output_path}')
     except Exception as e:
         print(f"Error saving {data_name} to {output_path}: {e}")
+        if not surpress_messages:
+            print(f'Saved {data_name} to {output_path}')
         raise(e)
     
     return None
 
 
-def get_metadata() -> pd.DataFrame:
+def get_metadata(surpress_messages: bool = False) -> pd.DataFrame:
 
-    meta1 = load_csv("data/metadata1.csv")
-    meta2 = load_csv("data/metadata2.csv")
+    meta1 = load_csv("data/metadata1.csv", surpress_messages)
+    meta2 = load_csv("data/metadata2.csv", surpress_messages)
 
     meta1['Dataset'] = "dataset1"
     meta2['Dataset'] = "dataset2"
