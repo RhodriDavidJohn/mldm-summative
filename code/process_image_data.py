@@ -51,6 +51,8 @@ def process_images(batch: list, save_loc: str) -> None:
 
     df = df.merge(right=clinical, on='patient_id', how='left')
 
+    df = df.dropna(subset=["death_2years"])
+
     hlp.save_csv(df, 'image features', save_loc)
 
     return None
