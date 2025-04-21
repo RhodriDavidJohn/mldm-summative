@@ -2,10 +2,37 @@
 import os
 import pandas as pd
 
-from code.utils import helpers as hlp
+from code.utils import helpers2 as hlp
 
 pd.set_option('future.no_silent_downcasting', True)
 
+
+
+def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Function to clean column names.
+
+    The function removes whitespace and special characters, 
+    converts to lowercase, and makes the names snake_case.
+    """
+
+    df = df.copy()
+
+    # remove whitespace
+    df.columns = df.columns.str.strip()
+
+    # remove special characters
+    df.columns = df.columns.str.replace('.', ' ')
+    df.columns = df.columns.str.replace('[%(),-]', '', regex=True)
+    df.columns = df.columns.str.replace('choice=', '')
+
+    # converts to lower case
+    df.columns = df.columns.str.lower()
+
+    # make the names snake case
+    df.columns = df.columns.str.replace(' ', '_')
+
+    return df
 
 
 def process_clinical1_data(filepath) -> pd.DataFrame:
@@ -23,7 +50,7 @@ def process_clinical1_data(filepath) -> pd.DataFrame:
 
     df = hlp.load_csv(filepath)
 
-    df = hlp.clean_column_names(df)
+    df = clean_column_names(df)
 
     rename_cols = {
         'patientid': 'patient_id'
@@ -82,7 +109,7 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
 
     df = hlp.load_csv(filepath)
 
-    df = hlp.clean_column_names(df)
+    df = clean_column_names(df)
 
     rename_cols = {
         'case_id': 'patient_id',

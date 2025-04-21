@@ -6,7 +6,7 @@ from skimage.measure import label, marching_cubes, mesh_surface_area
 from scipy.spatial.distance import  pdist
 from scipy.ndimage import zoom
 
-from code.utils import helpers as hlp
+from code.utils import helpers2 as hlp
 
 
 def get_image_filepath(df: pd.DataFrame, patient_id: str, image_type: str) -> str:
@@ -30,6 +30,23 @@ def get_image_filepath(df: pd.DataFrame, patient_id: str, image_type: str) -> st
         return os.path.join(self.input_path, dataset, filepath)
 
 
+def load_dicom(filepath: str) -> np.ndarray:
+
+    import warnings
+    warnings.filterwarnings("ignore", category=UserWarning, module="pydicom")
+
+    try:
+        dicom_file = pydicom.dcmread(filepath)
+        pixel_array = dicom_file.pixel_array
+        # normalise the image
+        image = (pixel_array / np.max(pixel_array) * 255).astype(np.uint8)
+    except Exception as e:
+        print(f"Error reading {filepath}: {e}")
+        raise(e)
+    
+    return image
+
+
 def load_image_list(folderpath: str) -> list:
     """
     Load the images from the given filepath
@@ -39,7 +56,7 @@ def load_image_list(folderpath: str) -> list:
     images = []
     for file in image_filepaths:
         filepath = os.path.join(folderpath, file)
-        image = hlp.load_dicom(filepath, self.LOGGER)
+        image = load_dicom(filepath, self.LOGGER)
         images.append(image)
         del image
     
@@ -99,6 +116,42 @@ def segmentation_features(tumour_array: np.ndarray, voxel_size: list) -> dict:
     else:
         return 0
 
+
+def calculate_glcm2(img, mask, nbins):
+
+    out = np.zeros((nbins,nbins,13))
+    offsets = [(1, 0, 0),
+                       (0, 1, 0),
+                       (0, 0, 1),
+                       (1, 1, 0),
+                       (-1, 1, 0),
+                       (1, 0, 1),
+                       (-1, 0, 1),
+                       (0, 1, 1),
+                       (0, -1, 1),
+                       (1, 1, 1),
+                       (-1, 1, 1),
+                       (1, -1, 1),
+                       (1, 1, -1)
+                       ]
+    matrix = np.array(img)
+    matrix[mask <= 0] = nbins
+    s= matrix.shape
+
+    bins = np.arange(0,nbins+1)
+
+    for i, offset in enumerate(offsets):
+
+        matrix1 = np.ravel(matrix[max(offset[0],0):s[0]+min(offset[0],0),max(offset[1],0):s[1]+min(offset[1],0),
+                  max(offset[2],0):s[2]+min(offset[2],0)])
+
+        matrix2 = np.ravel(matrix[max(-offset[0], 0):s[0]+min(-offset[0], 0), max(-offset[1], 0):s[1]+min(-offset[1], 0),
+                  max(-offset[2], 0):s[2]+min(-offset[2], 0)])
+
+
+        out[:,:,i] = np.histogram2d(matrix1,matrix2,bins=bins)[0]
+    return out
+
     
 def gray_level_cooccurrence_features(img: np.ndarray, mask: np.ndarray) -> dict:
 
@@ -106,7 +159,7 @@ def gray_level_cooccurrence_features(img: np.ndarray, mask: np.ndarray) -> dict:
 
     bin_img = np.digitize(img,bins)
 
-    glcm = hlp.calculate_glcm2(bin_img, mask, bins.size)
+    glcm = calculate_glcm2(bin_img, mask, bins.size)
 
     glcm = glcm/np.sum(glcm,axis=(0,1))
 

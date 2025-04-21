@@ -2,9 +2,9 @@
 import pandas as pd
 from configparser import ConfigParser
 
-from code.utils import helpers as hlp
+from code.utils import helpers2 as hlp
 
-configfile: "config.yml"
+configfile: "config/config.yml"
 
 # get a list of all the patient IDs that have
 # segmented images
@@ -25,7 +25,7 @@ rule all:
     "The default rule"
     input:
         expand("results/{data}_model_metrics.csv", data=[d for d in config["model_data"]]),
-        expand("results/{model)_{data}_model_{plot}.png",
+        expand("results/{model}_{data}_model_{plot}.png",
                model=["lreg", "mlp"],
                data=[d for d in config["model_data"]],
                plot=["roc", "shap"])
@@ -36,7 +36,7 @@ rule process_clinical:
         #"data/raw/pmids.tsv"
     output: 
         expand("data/clean/clinical{i}.csv", i = [1, 2]),
-        "data/clean/joined_clinical.csv"
+        "data/clean/clinical_joined.csv"
     log:
         "logs/snakemake/process_clinical_data.log"
     shell: """
@@ -44,8 +44,7 @@ rule process_clinical:
     echo Starting to process clinical data 2>&1 | tee -a {log}
     date 2>&1 | tee -a {log}
     mkdir -p data/clean 2>&1 | tee -a {log}
-
-     code/process_clinical_data.py 2>&1 | tee -a {log}
+    python code/process_clinical_data.py 2>&1 | tee -a {log}
     echo Finished processing clinical data 2>&1 | tee -a {log}
     date 2>&1 | tee -a {log}
     """
@@ -59,7 +58,7 @@ for batch, ids in seg_ids_dict.items():
             ids = ",".join([str(id) for id in ids])
         input:
             "data/metadata.csv",
-            "data/clean/joined_clinical.csv"
+            "data/clean/clinical_joined.csv"
         output:
             f"data/clean/image_features_{batch}.tsv"
         log:
@@ -67,8 +66,7 @@ for batch, ids in seg_ids_dict.items():
         shell: """
         echo "Starting to process the images for patients in batch {params.batch}" 2>&1 | tee {log}
         date 2>&1 | tee -a {log}
-
-         code/process_image_data.py {params.batch} "{params.ids}" 2>&1 | tee -a {log}
+        python code/process_image_data.py {params.batch} "{params.ids}" 2>&1 | tee -a {log}
         echo "Processing of images for patients in batch {params.batch} complete" 2>&1 | tee -a {log}
         date 2>&1 | tee -a {log}
         """
@@ -78,12 +76,13 @@ for data in config["model_data"]:
         name: f"develop_models_for_{data}"
         params: 
             data = f"{data}",
-            random_seed = config["random_seed"]
-            k_folds = config["k_folds"]
+            random_seed = config["random_seed"],
+            k_folds = config["k_folds"],
+            n_batches = n_batches
         input:
             f"data/clean/clinical1.csv",
             f"data/clean/clinical2.csv",
-            f"data/clean/joined_clinical.csv",
+            f"data/clean/clinical_joined.csv",
             expand("data/clean/image_features_{i}", i=range(1, n_batches+1))
         output: 
             expand("data/models/{data}/{type}.csv", data=data, type=["train", "test"]),
@@ -95,8 +94,7 @@ for data in config["model_data"]:
         date 2>&1 | tee -a {log}
         mkdir -p data/models/{params.data} 2>&1 | tee -a {log}
         mkdir -p results/models 2>&1 | tee -a {log}
-        
-         code/ {params.data} {params.random_seed} {params.k_folds} 2>&1 | tee -a {log}
+        python code/ {params.data} {params.random_seed} {params.k_folds} {params.n_batches} 2>&1 | tee -a {log}
         echo "Finished developing models for {params.data} data" 2>&1 | tee -a {log}
         date 2>&1 | tee -a {log}
         """
@@ -111,15 +109,14 @@ for data in config["model_data"]:
             expand("results/models/{model}_{data}_model.pkl", model=["lreg", "mlp"], data=data)
         output: 
             f"results/{data}_model_metrics.csv",
-            expand("results/{model)_{data}_model_{plot}.png",
+            expand("results/{model}_{data}_model_{plot}.png",
                    model=["lreg", "mlp"], data=data, plot=["roc", "shap"])
         log:
             f"logs/snakemake/evaluation_{data}.log"
         shell: """
         echo "Begin evaluating the models for the {params.data} data" 2>&1 | tee {log}
         date 2>&1 | tee -a {log}
-
-         code/ {params.data} 2>&1 | tee -a {log}
+        python code/ {params.data} 2>&1 | tee -a {log}
         echo "Finished evaluating the models for the {params.data} data" 2>&1 | tee -a {log}
         date 2>&1 | tee -a {log}
         """
