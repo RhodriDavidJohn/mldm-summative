@@ -127,7 +127,7 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
     df = df.rename(columns=rename_cols)
 
     # drop columns that wouldn't be available in clinical setting
-    drop_cols = ['recurrance', 'recurrence_location',
+    drop_cols = ['recurrence', 'recurrence_location',
                  'date_of_recurrence', 'quit_smoking_year']
     df.drop(columns=drop_cols, inplace=True)
 
@@ -201,9 +201,7 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
     df['clinical_m_stage'] = df['clinical_m_stage'].fillna(-1)
     df['overall_stage'] = df['overall_stage'].fillna(-1)
 
-    for col in obj_cols:
-        if col=='patient_id':
-            continue
+    for col in ['histology', 'ethnicity']:
         df[col] = df[col].str.replace(' ', '_')
 
     # derive a variable for survival time
