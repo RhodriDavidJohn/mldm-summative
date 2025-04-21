@@ -29,7 +29,7 @@ def get_image_filepath(df: pd.DataFrame, patient_id: str, image_type: str) -> st
         dataset = access_dataframe_value('Dataset')
         filepath = access_dataframe_value('File Location')
 
-        return os.path.join(self.input_path, dataset, filepath)
+        return os.path.join(base_dir, dataset, filepath)
 
 
 def load_dicom(filepath: str) -> np.ndarray:
