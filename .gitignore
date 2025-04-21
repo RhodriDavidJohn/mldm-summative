@@ -1,3 +1,6 @@
 __pycache__
 .DS_Store
 .snakemake
+data/clean
+data/models
+results
