@@ -66,14 +66,8 @@ def load_image_list(folderpath: str) -> list:
     return images
 
 
-def load_images(patient_id: str) -> dict:
+def load_images(patient_id: str, seg_filepath: str, ct_filepath: str) -> dict:
 
-    metadata = hlp.get_metadata()
-
-    seg_filepath = get_image_filepath(metadata, patient_id, 'SEG')
-    ct_filepath = get_image_filepath(metadata, patient_id, 'CT')
-
-        
     # load the images
     image_type_dict = {
         'seg': load_image_list(seg_filepath),
@@ -239,18 +233,7 @@ def get_glcm_features_3d(image: np.ndarray,
                          mask: np.ndarray,
                          distances=[1],
                          angles=[0, np.pi/4, np.pi/2, 3*np.pi/4]) -> dict:
-    """
-    Calculate GLCM features for a 3D image within a masked region.
-
-    Parameters:
-    - image: np.ndarray, the 3D grayscale image.
-    - mask: np.ndarray, the binary mask (same shape as image) where features are calculated.
-    - distances: list, pixel pair distances for GLCM calculation.
-    - angles: list, angles (in radians) for GLCM calculation.
-
-    Returns:
-    - dict: A dictionary containing GLCM features (contrast, dissimilarity, homogeneity, energy, correlation).
-    """
+    
     # Apply the mask to the image
     masked_image = image * (mask > 0)
 

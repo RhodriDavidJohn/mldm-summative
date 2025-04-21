@@ -18,7 +18,7 @@ def process_images(batch: list, save_loc: str) -> None:
         seg_folderpath = get_image_filepath(metadata, patient_id, 'SEG')
         ct_folderpath = get_image_filepath(metadata, patient_id, 'CT')
 
-        image_list_dict = load_images(patient_id)
+        image_list_dict = load_images(patient_id, seg_folderpath, ct_folderpath)
 
         image_dict = {
             'seg': image_list_dict['seg'][0],
@@ -28,7 +28,12 @@ def process_images(batch: list, save_loc: str) -> None:
         del image_list_dict
 
         # process the data
-        features = extract_tumour_properties(img=image_dict['ct'], mask=image_dict['seg'])
+        try:
+            features = extract_tumour_properties(img=image_dict['ct'],
+                                                 mask=image_dict['seg'])
+        except Exception as e:
+            print(f"Error processing images for patient ID {patient_id}: {e}")
+            raise(e)
         data.append([patient_id] + features)
     
     columns = (["patient_id"] +
