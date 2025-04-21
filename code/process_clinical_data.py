@@ -27,7 +27,7 @@ def process_clinical_data() -> None:
 
     # save the joined dataset
     output_path = 'data/clean/clinical_joined.csv'
-    hlp.save_csv(df, 'joined clinical data', output_path)
+    hlp.save_csv(clinical_joined, 'joined clinical data', output_path)
 
     return None
 
