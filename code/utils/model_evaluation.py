@@ -4,6 +4,7 @@ import pandas as pd
 import joblib
 import shap
 import matplotlib.pyplot as plt
+from sklearn.metrics import roc_auc_score, f1_score, roc_curve, auc
 
 
 
