@@ -1,0 +1,11 @@
+default-resources:
+- slurm_partition="teach_cpu"
+- slurm_account="sscm033324"
+- mem_mb="1000"
+- runtime="4800"
+- ntasks="4"
+- nodes="1"
+jobs: 12
+printshellcmds: True
+scheduler: greedy
+use-conda: True
