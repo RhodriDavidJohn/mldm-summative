@@ -126,6 +126,12 @@ for data in config["model_data"]:
 rule clean:
     "Clean up"
     shell: """
+    if [ -d logs ]; then
+      echo "Removing directory logs"
+      rm -r logs
+    else
+      echo directory logs does not exist
+    fi
     if [ -d data/clean ]; then
       echo "Removing directory data/clean"
       rm -r data/clean
