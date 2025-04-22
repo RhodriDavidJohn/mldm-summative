@@ -82,14 +82,20 @@ def plot_shap(model_type: str, model, X_test: pd.DataFrame, filepath: str):
     if not hasattr(model, "predict_proba"):
         print(f"Model {model_type} does not support SHAP explanations.")
         return None
+    
+    # preprocess the data
+    X_test_transformed = model.named_step["preprocessing"].transform(X_test)
+
+    # extract the model part of pipeline
+    ml_model = model.named_step[model_type]
 
     # Initialize SHAP explainer
-    explainer = shap.Explainer(model, X_test)
-    shap_values = explainer(X_test)
+    explainer = shap.Explainer(ml_model, X_test_transformed)
+    shap_values = explainer(X_test_transformed)
 
     # Plot SHAP summary plot
     plt.figure(figsize=(10, 6))
-    shap.summary_plot(shap_values, X_test, show=False)
+    shap.summary_plot(shap_values, X_test_transformed, show=False)
     
     # Save the plot
     plt.savefig(filepath)
