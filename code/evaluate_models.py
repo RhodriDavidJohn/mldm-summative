@@ -35,7 +35,7 @@ def evaluate_models(data_name: str) -> None:
     lreg_metrics = model_evaluation("lreg", lreg_model, data_name, X_test, y_test)
     mlp_metrics = model_evaluation("mlp", mlp_model, data_name, X_test, y_test)
 
-    metrics_df = lreg_metrics.merge(mlp_metrics, on=(None, "Data"), how="inner")
+    metrics_df = lreg_metrics.merge(mlp_metrics)
 
     save_loc = f"results/{data_name}_model_metrics.csv"
     hlp.save_csv(metrics_df, data_name, save_loc)

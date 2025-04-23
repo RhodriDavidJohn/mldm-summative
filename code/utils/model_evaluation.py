@@ -2,6 +2,7 @@
 import os
 import pandas as pd
 import joblib
+from sklearn.pipeline import Pipeline
 import shap
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score, f1_score, roc_curve, auc
@@ -19,7 +20,7 @@ def load_model(filepath: str):
         raise(e)
 
 
-def get_metrics(model_type: str, model, data_name: str,
+def get_metrics(model_type: str, model: Pipeline, data_name: str,
                 X_test: pd.DataFrame, y_test: pd.Series) -> pd.DataFrame:
     """
     Function to get the following evaluation metrics
@@ -44,8 +45,8 @@ def get_metrics(model_type: str, model, data_name: str,
     return metrics_df
 
 
-def plot_roc(model_type: str, data_name: str,
-             model, X_test: pd.DataFrame, y_test: pd.Series, filepath: str):
+def plot_roc(model_type: str, data_name: str, model: Pipeline,
+             X_test: pd.DataFrame, y_test: pd.Series, filepath: str):
     """
     Function to plot the ROC curve
     """
@@ -73,24 +74,28 @@ def plot_roc(model_type: str, data_name: str,
     print(f"ROC curve saved to {filepath}")
 
 
-def plot_shap(model_type: str, model, X_test: pd.DataFrame, filepath: str):
+def plot_shap(model_type: str, model_type_long: str, model: Pipeline,
+              X_test: pd.DataFrame, filepath: str):
     """
     Function to plot SHAP feature importance
     """
-
-    # Check if the model has a predict_proba method
-    if not hasattr(model, "predict_proba"):
-        print(f"Model {model_type} does not support SHAP explanations.")
-        return None
     
     # preprocess the data
-    X_test_transformed = model.named_step["preprocessing"].transform(X_test)
+    X_test_transformed = model.named_steps["preprocessing"].transform(X_test)
 
     # extract the model part of pipeline
-    ml_model = model.named_step[model_type]
+    ml_model = model.named_steps[model_type]
+
+    # Check if the model has a predict_proba method
+    if not hasattr(ml_model, "predict_proba"):
+        print(f"Model {model_type_long} does not support SHAP explanations.")
+        return None
 
     # Initialize SHAP explainer
-    explainer = shap.Explainer(ml_model, X_test_transformed)
+    if model_type=='lreg':
+        explainer = shap.Explainer(ml_model, X_test_transformed)
+    elif model_type=='mlp':
+        explainer = shap.KernelExplainer(ml_model.predict, X_test_transformed)
     shap_values = explainer(X_test_transformed)
 
     # Plot SHAP summary plot
@@ -103,7 +108,7 @@ def plot_shap(model_type: str, model, X_test: pd.DataFrame, filepath: str):
     print(f"SHAP feature importance plot saved to {filepath}")
 
 
-def model_evaluation(model_type: str, model, data_name: str,
+def model_evaluation(model_type: str, model: Pipeline, data_name: str,
                      X_test: pd.DataFrame, y_test: pd.Series) -> pd.DataFrame:
     
     if model_type=="lreg":
@@ -122,7 +127,7 @@ def model_evaluation(model_type: str, model, data_name: str,
     plot_roc(model_type_long, data_name_long, model, X_test, y_test, roc_filepath)
 
     shap_filepath = f"results/shap_plots/{model_type}_{data_name}_model_shap.png"
-    plot_shap(model_type_long, model, X_test, shap_filepath)
+    plot_shap(model_type, model_type_long, model, X_test, shap_filepath)
 
     return metrics
 
