@@ -9,4 +9,4 @@ model_data:
 
 random_seed: 42
 
-k_folds: 3
+k_folds: 5
