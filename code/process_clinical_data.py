@@ -20,13 +20,6 @@ def process_clinical_data() -> None:
 
     clinical_joined = pd.concat([cleaned_clinical1, cleaned_clinical2[cols]], axis=0)
 
-    # mark null categorical values as unknown or not_applicable
-    # for variables that are in one of the datasets but not the other
-    cols_to_mark_unkown = ['affiliation', 'smoking_status', 'ethnicity']
-    clinical_joined[cols_to_mark_unkown] = clinical_joined[cols_to_mark_unkown].fillna('unknown')
-
-    clinical_joined['pack_years'] = clinical_joined['pack_years'].fillna(-1)
-
     # save the joined dataset
     output_path = 'data/clean/clinical_joined.csv'
     hlp.save_csv(clinical_joined, 'joined clinical data', output_path)
