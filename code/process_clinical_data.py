@@ -16,7 +16,9 @@ def process_clinical_data() -> None:
     cleaned_clinical1 = process_clinical1_data(clinical1_path)
     cleaned_clinical2 = process_clinical2_data(clinical2_path)
 
-    clinical_joined = pd.concat([cleaned_clinical1, cleaned_clinical2], axis=0)
+    cols = cleaned_clinical1.columns.tolist()
+
+    clinical_joined = pd.concat([cleaned_clinical1, cleaned_clinical2[cols]], axis=0)
 
     # mark null categorical values as unknown or not_applicable
     # for variables that are in one of the datasets but not the other

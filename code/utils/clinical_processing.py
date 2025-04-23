@@ -127,8 +127,11 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
     df = df.rename(columns=rename_cols)
 
     # drop columns that wouldn't be available in clinical setting
+    # or are heavily skewed
     drop_cols = ['recurrence', 'recurrence_location',
-                 'date_of_recurrence', 'quit_smoking_year']
+                 'alk_translocation_status', 'tumor_location_l_lingula',
+                 'tumor_location_unknown', 'date_of_recurrence',
+                 'quit_smoking_year']
     df.drop(columns=drop_cols, inplace=True)
 
     # make the string values lower case
@@ -179,9 +182,10 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
 
     word_replacements = {
         'nsclc nos (not otherwise specified)': 'nos',
-        'african-american': 'african_american',
-        'hispanic/latino': 'hispanic_latino',
-        'native hawaiian/pacific islander': 'native_islander'
+        'asian': 'other'
+        'african-american': 'other',
+        'hispanic/latino': 'other',
+        'native hawaiian/pacific islander': 'other'
     }
 
     replacements = [missing_value_replacement, binary_value_replacement, gg_replacement,
