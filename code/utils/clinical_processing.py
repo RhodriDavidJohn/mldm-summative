@@ -182,7 +182,7 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
 
     word_replacements = {
         'nsclc nos (not otherwise specified)': 'nos',
-        'asian': 'other'
+        'asian': 'other',
         'african-american': 'other',
         'hispanic/latino': 'other',
         'native hawaiian/pacific islander': 'other'
