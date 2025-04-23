@@ -86,11 +86,11 @@ def train_models(data_name: str, k_folds: int,
     mlp_model = MLPClassifier(activation='relu', solver='adam',
                               random_state=random_seed)
     mlp_params = {
-        "mlp__hidden_layer_sizes": [(100,), (100,50), (100,50,50), (100,50,25)],
+        "mlp__hidden_layer_sizes": [(100,), (100,100), (100,50), (100,25), (100,50,50), (100,50,25)],
         "mlp__alpha": [0.001, 0.01, 0.1],
         "mlp__learning_rate": ['constant', 'adaptive', 'invscaling'],
         "mlp__batch_size": [32, 64],
-        "mlp__max_iter": [200, 500, 1000]
+        "mlp__max_iter": [1250, 1500, 1750, 2000, 2250, 2500]
     }
 
     msg = ("Training the MLP model on "
