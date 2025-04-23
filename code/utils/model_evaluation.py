@@ -28,6 +28,8 @@ def get_metrics(model_type: str, model: Pipeline, data_name: str,
     2) F1 score
     """
 
+    data_name = data_name.title()
+
     # get model predictions
     y_pred = model.predict(X_test)
     y_pred_proba = model.predict_proba(X_test)[:, 1]
@@ -37,7 +39,7 @@ def get_metrics(model_type: str, model: Pipeline, data_name: str,
     f1 = f1_score(y_test, y_pred)
 
     metrics_df = pd.DataFrame({
-        (None, "Data"): [data_name],
+        ("", "Data"): [data_name],
         (model_type, "AUC"): [round(auc, 2)],
         (model_type, "F1 score"): [round(f1, 2)]
     })
@@ -75,13 +77,20 @@ def plot_roc(model_type: str, data_name: str, model: Pipeline,
 
 
 def plot_shap(model_type: str, model_type_long: str, model: Pipeline,
-              X_test: pd.DataFrame, filepath: str):
+              data_name: str, X_test: pd.DataFrame, filepath: str):
     """
     Function to plot SHAP feature importance
     """
     
     # preprocess the data
     X_test_transformed = model.named_steps["preprocessing"].transform(X_test)
+
+    # get feature names
+    features = model.named_steps["preprocessing"].get_feature_names_out()
+    try:
+        features = [feature.split('__')[1] for feature in features]
+    except:
+        pass
 
     # extract the model part of pipeline
     ml_model = model.named_steps[model_type]
@@ -95,12 +104,17 @@ def plot_shap(model_type: str, model_type_long: str, model: Pipeline,
     if model_type=='lreg':
         explainer = shap.Explainer(ml_model, X_test_transformed)
     elif model_type=='mlp':
-        explainer = shap.KernelExplainer(ml_model.predict, X_test_transformed)
+        return None
+        #explainer = shap.KernelExplainer(ml_model.predict, X_test_transformed)
     shap_values = explainer(X_test_transformed)
 
     # Plot SHAP summary plot
-    plt.figure(figsize=(10, 6))
-    shap.summary_plot(shap_values, X_test_transformed, show=False)
+    plt.figure(figsize=(14, 20))
+    shap.summary_plot(shap_values, X_test_transformed, feature_names=features, show=False)
+    title = (f"SHAP plot for the {model_type_long} model "
+             f"trained on {data_name.replace('_', ' ')}")
+    plt.title(title, pad=10)
+    plt.grid()
     
     # Save the plot
     plt.savefig(filepath)
@@ -127,7 +141,7 @@ def model_evaluation(model_type: str, model: Pipeline, data_name: str,
     plot_roc(model_type_long, data_name_long, model, X_test, y_test, roc_filepath)
 
     shap_filepath = f"results/shap_plots/{model_type}_{data_name}_model_shap.png"
-    plot_shap(model_type, model_type_long, model, X_test, shap_filepath)
+    plot_shap(model_type, model_type_long, model, data_name, X_test, shap_filepath)
 
     return metrics
 
