@@ -104,8 +104,7 @@ def plot_shap(model_type: str, model_type_long: str, model: Pipeline,
     if model_type=='lreg':
         explainer = shap.Explainer(ml_model, X_test_transformed)
     elif model_type=='mlp':
-        return None
-        #explainer = shap.KernelExplainer(ml_model.predict, X_test_transformed)
+        explainer = shap.KernelExplainer(ml_model.predict, X_test_transformed)
     shap_values = explainer(X_test_transformed)
 
     # Plot SHAP summary plot
