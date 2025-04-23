@@ -11,6 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import make_scorer, roc_auc_score
+from sklearn.utils import resample
 import joblib
 
 from utils import helpers2 as hlp
@@ -86,11 +87,10 @@ def model_development(model_type: str, model, params: dict, k_folds: int,
     ])
 
     # initiate gridsearchcv object
-    auc_scorer = make_scorer(roc_auc_score, needs_proba=True)
     pipe_cv = GridSearchCV(
         pipe,
         params,
-        scoring=auc_scorer,
+        scoring='roc_auc',
         refit=True,
         cv=k_folds,
         n_jobs=-1,
@@ -118,6 +118,13 @@ def model_development(model_type: str, model, params: dict, k_folds: int,
                f"on the {data_name.replace('_', ' ')} data: {e}")
         print(msg)
         raise(e)
+    
+    # display best hyperparameters
+    best_params = pipe_cv.best_params_
+    msg = (f"The best {model_type} model trained on the "
+           f"{data_name.replace('_', ' ')} data had the following "
+           f"hyperparameters from cross validation: {best_params}")
+    print(msg)
         
     # display the AUC score
     auc = pipe_cv.best_score_
@@ -154,13 +161,18 @@ def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tup
     y = data['death_2years'].copy()
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, stratify=y, random_state=random_state
+        X, y, test_size=0.3, stratify=y, random_state=random_state
     )
 
-    train_data = X_train.join(y_train)
+    # bootstrap the training data to create more robust model
+    X_train_bootstrap, y_train_bootstrap = resample(X_train, y_train, replace=True,
+                                                    n_samples=len(X_train), random_state=random_state)
+
+
+    train_data = X_train_bootstrap.join(y_train_bootstrap)
     test_data = X_test.join(y_test)
 
-    X_train = X_train.drop("patient_id", axis=1)
+    X_train_bootstrap = X_train_bootstrap.drop("patient_id", axis=1)
     X_test = X_test.drop("patient_id", axis=1)
 
     train_data_msg = f"taining data for {data_name.replace('_', ' ')}"
@@ -173,4 +185,4 @@ def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tup
     hlp.save_csv(train_data, train_data_msg, os.path.join(model_data_path, 'train.csv'))
     hlp.save_csv(test_data, test_data_msg, os.path.join(model_data_path, 'test.csv'))
 
-    return (X_train, X_test, y_train, y_test)
+    return (X_train_bootstrap, X_test, y_train_bootstrap, y_test)
