@@ -92,6 +92,10 @@ def plot_shap(model_type: str, model_type_long: str, model: Pipeline,
     except:
         pass
 
+    X_test_transformed = pd.DataFrame(
+        data=X_test_transformed, columns=features
+    )
+
     # extract the model part of pipeline
     ml_model = model.named_steps[model_type]
 
@@ -108,12 +112,10 @@ def plot_shap(model_type: str, model_type_long: str, model: Pipeline,
     shap_values = explainer(X_test_transformed)
 
     # Plot SHAP summary plot
-    plt.figure(figsize=(14, 20))
-    shap.summary_plot(shap_values, X_test_transformed, feature_names=features, show=False)
-    title = (f"SHAP plot for the {model_type_long} model "
-             f"trained on {data_name.replace('_', ' ')}")
-    plt.title(title, pad=10)
-    plt.grid()
+    title = (f"SHAP plot (top 10 features): {model_type_long} model "
+             f"trained on {data_name.replace('_', ' ')} data")
+    shap.summary_plot(shap_values, X_test_transformed, max_display=10, show=False)
+    plt.title(title, fontsize=16, pad=20)
     
     # Save the plot
     plt.savefig(filepath)
