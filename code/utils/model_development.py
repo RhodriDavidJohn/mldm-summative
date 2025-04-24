@@ -44,7 +44,7 @@ def pre_processing_pipeline(df: pd.DataFrame, mixed_cols: bool) -> Pipeline:
         ordinal_process = Pipeline([('impute', SimpleImputer(strategy='most_frequent'))])
         categorical_process = Pipeline([
             ('impute', SimpleImputer(strategy='most_frequent')),
-            ('encode', OneHotEncoder())
+            ('encode', OneHotEncoder(handle_unknown='infrequent_if_exist'))
         ])
         numerical_process = Pipeline([
             ('impute', SimpleImputer(strategy='median')),
