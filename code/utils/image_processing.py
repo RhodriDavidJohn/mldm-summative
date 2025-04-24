@@ -8,7 +8,7 @@ from skimage.feature import graycomatrix, graycoprops
 from scipy.spatial.distance import  pdist
 from scipy.ndimage import zoom
 
-from utils import helpers2 as hlp
+from utils import helpers as hlp
 
 
 def get_image_filepath(df: pd.DataFrame, patient_id: str, image_type: str) -> str:

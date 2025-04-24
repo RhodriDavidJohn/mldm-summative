@@ -14,7 +14,7 @@ from sklearn.metrics import make_scorer, roc_auc_score
 from sklearn.utils import resample
 import joblib
 
-from utils import helpers2 as hlp
+from utils import helpers as hlp
 
 
 def pre_processing_pipeline(df: pd.DataFrame, mixed_cols: bool) -> Pipeline:

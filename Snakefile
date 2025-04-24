@@ -2,7 +2,7 @@
 import pandas as pd
 from configparser import ConfigParser
 
-from code.utils.helpers2 import get_metadata
+from code.utils.helpers import get_metadata
 
 configfile: "config/config.yml"
 

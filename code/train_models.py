@@ -4,7 +4,7 @@ import pandas as pd
 from sys import argv
 
 from utils.model_development import *
-from utils import helpers2 as hlp
+from utils import helpers as hlp
 
 
 def train_models(data_name: str, k_folds: int,
