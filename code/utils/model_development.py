@@ -164,18 +164,13 @@ def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tup
         X, y, test_size=0.3, stratify=y, random_state=random_state
     )
 
-    # bootstrap the training data to create more robust model
-    X_train_bootstrap, y_train_bootstrap = resample(X_train, y_train, replace=True,
-                                                    n_samples=len(X_train), random_state=random_state)
-
-
-    train_data = X_train_bootstrap.join(y_train_bootstrap)
+    train_data = X_train.join(y_train)
     test_data = X_test.join(y_test)
 
-    X_train_bootstrap = X_train_bootstrap.drop("patient_id", axis=1)
+    X_train = X_train.drop("patient_id", axis=1)
     X_test = X_test.drop("patient_id", axis=1)
 
-    train_data_msg = f"taining data for {data_name.replace('_', ' ')}"
+    train_data_msg = f"training data for {data_name.replace('_', ' ')}"
     test_data_msg = f"testing data for {data_name.replace('_', ' ')}"
 
     model_data_path = os.path.join(
@@ -185,7 +180,7 @@ def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tup
     hlp.save_csv(train_data, train_data_msg, os.path.join(model_data_path, 'train.csv'))
     hlp.save_csv(test_data, test_data_msg, os.path.join(model_data_path, 'test.csv'))
 
-    return (X_train_bootstrap, X_test, y_train_bootstrap, y_test)
+    return (X_train, X_test, y_train, y_test)
 
 
 def load_data(input_dir: str, n_batches: int) -> dict:
