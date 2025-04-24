@@ -149,28 +149,17 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
         # calculate volume
         volume = prop.area
 
-        # calculate sphericity
-        sphericity = (np.pi**(1/3) * (6 * volume)**(2/3)) / surface_area
-
         # calculate elongation
         try:
             min_axis_length = min(prop.major_axis_length, prop.minor_axis_length)
             max_axis_length = max(prop.major_axis_length, prop.minor_axis_length)
-            elongation = max_axis_length / min_axis_length
+            features["elongation"].append(max_axis_length / min_axis_length)
         except:
             # no elongation
-            elongation = 1
-
-        # calculate compactness
-        compactness = (surface_area**2) / volume
+            features["elongation"].append(1)
 
         # calculate radius
         radius = (3 * volume / (4 * np.pi))**(1/3)
-
-        # append features
-        features["sphericity"].append(sphericity)
-        features["elongation"].append(elongation)
-        features["compactness"].append(compactness)
 
         # aggregate features
         features["volume"] += volume
@@ -178,10 +167,11 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
 
     # calculate surface to volume ratio
     features["surface_to_volume_ratio"] = features["surface_area"] / features["volume"]
+    features["sphericity"] = (np.pi**(1/3) * (6 * features["volume"])**(2/3)) / surface_area
+    features["compactness"] = (surface_area**3)/(features["volume"]**2)
 
-    # average features over all regions
-    for key in ["sphericity", "elongation", "compactness"]:
-        features[key] = np.mean(features[key])
+    # average elongation over all regions
+    features["elongation"] = np.mean(features["elongation"])
 
     return features
 
