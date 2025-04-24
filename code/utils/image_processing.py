@@ -124,10 +124,18 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
     # calculate surface area
     verts, faces, _, _ = marching_cubes(tumour_array, 0.5)
     surface_area = mesh_surface_area(verts, faces)
+
+    # calculate max diameter
+    chunk_size = 1000
+    max_distance = 0
+    for i in range(0, len(verts), chunk_size):
+        chunk = verts[i:(i + chunk_size)]
+        distance = pdist(chunk)
+        max_distance = max(max_distance, np.amax(distance))
      
     features = {
         "n_tumours": len(properties),
-        "maximum_diameter": 0,
+        "maximum_diameter": max_distance,
         "surface_area": surface_area,
         "surface_to_volume_ratio": 0,
         "volume": 0,
@@ -136,7 +144,7 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
         "elongation": [],
         "compactness": []
     }
-    print(properties)
+    
     for prop in properties:
         # calculate volume
         volume = prop.area
@@ -145,20 +153,16 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
         sphericity = (np.pi**(1/3) * (6 * volume)**(2/3)) / surface_area
 
         # calculate elongation
-        min_axis_length = min(prop.major_axis_length, prop.minor_axis_length)
-        max_axis_length = max(prop.major_axis_length, prop.minor_axis_length)
-        if min_axis_length != 0:
+        try:
+            min_axis_length = min(prop.major_axis_length, prop.minor_axis_length)
+            max_axis_length = max(prop.major_axis_length, prop.minor_axis_length)
             elongation = max_axis_length / min_axis_length
-        else:
+        except:
             # no elongation
             elongation = 1
 
-
         # calculate compactness
         compactness = (surface_area**2) / volume
-
-        # calculate maximum diameter
-        max_diameter = max(prop.major_axis_length, prop.minor_axis_length)
 
         # calculate radius
         radius = (3 * volume / (4 * np.pi))**(1/3)
@@ -170,7 +174,6 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
 
         # aggregate features
         features["volume"] += volume
-        features["maximum_diameter"] = max(features["maximum_diameter"], max_diameter)
         features["radius"] += radius
 
     # calculate surface to volume ratio
