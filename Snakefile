@@ -127,10 +127,10 @@ rule clean:
     "Clean up"
     shell: """
     if [ -d logs ]; then
-      echo "Removing directory logs"
-      rm -r logs
+      echo "Removing directory logs/snakemake"
+      rm -r logs/snakemake
     else
-      echo directory logs does not exist
+      echo directory logs/snakemake does not exist
     fi
     if [ -d data/clean ]; then
       echo "Removing directory data/clean"
