@@ -132,11 +132,14 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
         "elongation": [],
         "compactness": []
     }
-
+    print(properties)
     for prop in properties:
-        # calculate volume and surface area
+        # calculate volume
         volume = prop.area
-        surface_area = prop.perimeter
+
+        # calculate surface area
+        verts, faces, _, _ = marching_cubes(tumour_array == prop.label)
+        surface_area = mesh_surface_area(verts, faces)
 
         # calculate sphericity
         sphericity = (np.pi**(1/3) * (6 * volume)**(2/3)) / surface_area
