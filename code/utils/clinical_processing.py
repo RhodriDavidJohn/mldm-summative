@@ -198,6 +198,15 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
 
     df.replace(replacement_dict, inplace=True)
 
+    # engineer feature to summarise gene mutation
+    def condition(i):
+        cond = (
+            (df.loc[i, 'egfr_mutation_status']=='wildtype') |
+            (df.loc[i, 'kras_mutation_status']=='wildtype')
+        )
+        return cond
+    df['gene_mutation'] = ['yes' if condition(i) else 'no' for i in range(len(df))]
+
     # for ordered categories replace null values with -1
     df['gg_percentage'] = df['gg_percentage'].fillna(-1)
     df['clinical_t_stage'] = df['clinical_t_stage'].fillna(-1)
