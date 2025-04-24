@@ -114,118 +114,66 @@ def segmentation_features(tumour_array: np.ndarray, voxel_size: list) -> dict:
         return 0
 
 
-def calculate_glcm2(img, mask, nbins):
 
-    offsets = [(1, 0, 0),
-               (0, 1, 0),
-               (0, 0, 1),
-               (1, 1, 0),
-               (-1, 1, 0),
-               (1, 0, 1),
-               (-1, 0, 1),
-               (0, 1, 1),
-               (0, -1, 1),
-               (1, 1, 1),
-               (-1, 1, 1),
-               (1, -1, 1),
-               (1, 1, -1)]
+def shape_morphological_features(tumour_array: np.ndarray) -> dict:
 
-    out = np.zeros((nbins, nbins, len(offsets)))
-    
-    matrix = np.array(img)
-    matrix[mask <= 0] = nbins - 1
-    s= matrix.shape
+    # label the connected regions in the tumor array
+    labeled_tumour = label(tumour_array)
+    properties = regionprops(labeled_tumour)
+     
+    features = {
+        "n_tumours": len(properties),
+        "maximum_diameter": 0,
+        "surface_area": 0,
+        "surface_to_volume_ratio": 0,
+        "volume": 0,
+        "radius": 0,
+        "sphericity": [],
+        "elongation": [],
+        "compactness": []
+    }
 
-    bins = np.arange(0,nbins+1)
+    for prop in properties:
+        # calculate volume and surface area
+        volume = prop.area
+        surface_area = prop.perimeter
 
-    for i, offset in enumerate(offsets):
+        # calculate sphericity
+        sphericity = (np.pi**(1/3) * (6 * volume)**(2/3)) / surface_area
 
-        matrix1 = np.ravel(matrix[max(offset[0],0):s[0]+min(offset[0],0),max(offset[1],0):s[1]+min(offset[1],0),
-                  max(offset[2],0):s[2]+min(offset[2],0)])
+        # calculate elongation
+        min_axis_length = min(prop.major_axis_length, prop.minor_axis_length)
+        max_axis_length = max(prop.major_axis_length, prop.minor_axis_length)
+        elongation = max_axis_length / min_axis_length
 
-        matrix2 = np.ravel(matrix[max(-offset[0], 0):s[0]+min(-offset[0], 0), max(-offset[1], 0):s[1]+min(-offset[1], 0),
-                  max(-offset[2], 0):s[2]+min(-offset[2], 0)])
+        # calculate compactness
+        compactness = (surface_area**2) / volume
 
+        # calculate maximum diameter
+        max_diameter = max(prop.major_axis_length, prop.minor_axis_length)
 
-        out[:,:,i] = np.histogram2d(matrix1,matrix2,bins=bins)[0]
-    return out
+        # calculate radius
+        radius = (3 * volume / (4 * np.pi))**(1/3)
 
-    
-def gray_level_cooccurrence_features(img: np.ndarray, mask: np.ndarray) -> dict:
+        # append features
+        features["sphericity"].append(sphericity)
+        features["elongation"].append(elongation)
+        features["compactness"].append(compactness)
 
-    bins = np.arange(np.amin(img),np.amax(img),step=25)
+        # aggregate features
+        features["surface_area"] += surface_area
+        features["volume"] += volume
+        features["maximum_diameter"] = max(features["maximum_diameter"], max_diameter)
+        features["radius"] += radius
 
-    bin_img = np.digitize(img,bins)
+    # calculate surface to volume ratio
+    features["surface_to_volume_ratio"] = features["surface_area"] / features["volume"]
 
-    glcm = calculate_glcm2(bin_img, mask, bins.size)
-
-    glcm = glcm/np.sum(glcm,axis=(0,1))
-
-    ix = np.array(np.arange(1,bins.size+1)[:,np.newaxis,np.newaxis],dtype=np.float64)
-    iy = np.array(np.arange(1, bins.size + 1)[np.newaxis,:, np.newaxis],dtype=np.float64)
-
-
-    px = np.sum(glcm,axis=0)
-    px = px[np.newaxis,...]
-    py = np.sum(glcm,axis=1)
-    py = py[:,np.newaxis,:]
-
-    ux = np.mean(glcm,axis=0)
-    ux = ux[np.newaxis,...]
-    uy = np.mean(glcm,axis=1)
-    uy = uy[:,np.newaxis,:]
-
-    sigma_x = np.std(glcm,axis=0)
-    sigma_x = sigma_x[np.newaxis,...]
-    sigma_y = np.std(glcm,axis=1)
-    sigma_y = sigma_y[:,np.newaxis,:]
-
-    pxylog = np.log2(px * py+1e-7)
-    pxylog[(px * py) == 0] = 0
-
-    pxyp = np.zeros((2*bins.size,glcm.shape[2]))
-    ki = ix+iy
-    ki = ki[:,:,0]
-
-    for angle in range(glcm.shape[2]):
-        for k in range(1,2*bins.size):
-            glcm_view =glcm[...,angle]
-            pxyp[k,angle] = np.sum(glcm_view[ki==(k+1)])
-
-    pxyplog = np.log2(pxyp+1e-7)
-    pxyplog[pxyp == 0] = 0
-
-    pxym = np.zeros((bins.size, glcm.shape[2]))
-    ki = np.abs(ix - iy)
-    ki = ki[:, :, 0]
-    for angle in range(glcm.shape[2]):
-        for k in range(0, bins.size):
-            glcm_view = glcm[..., angle]
-            pxym[k, :] = np.sum(glcm_view[ki == k])
-
-    pxymlog = np.log2(pxym+1e-7)
-    pxymlog[pxym == 0] = 0
-
-    inverse_variance = 0
-
-    for angle in range(glcm.shape[2]):
-        glcm_view = glcm[:,:,angle]
-        index = ix != iy
-        diff = ix-iy
-        diff = diff[...,0]
-        index = index[...,0]
-        inverse_variance += np.sum(glcm_view[index]/(diff[index])**2)
-    inverse_variance /= glcm.shape[2]
-
-
-    features = {"contrast": np.mean(np.sum((ix-iy)**2*glcm,axis=(0,1))),
-                "correlation": np.mean(np.sum((ix*iy*glcm-ux*uy)/(sigma_x*sigma_y+1e-6),axis=(0,1))),
-                "dissimilarity": np.mean(np.sum(np.abs(ix-iy)*glcm,axis=(0,1))),
-                "homogeneity": np.mean(np.sum(glcm/(1+np.abs(ix-iy)),axis=(0,1)))
-                }
+    # average features over all regions
+    for key in ["sphericity", "elongation", "compactness"]:
+        features[key] = np.mean(features[key])
 
     return features
-
 
 
 
@@ -234,39 +182,41 @@ def get_glcm_features_3d(image: np.ndarray,
                          distances=[1],
                          angles=[0, np.pi/4, np.pi/2, 3*np.pi/4]) -> dict:
     
-    # Apply the mask to the image
+    # apply the mask to the image
     masked_image = image * (mask > 0)
 
-    # Normalize the image to have integer values (required for GLCM)
-    normalized_image = ((masked_image - masked_image.min()) / (masked_image.max() - masked_image.min()) * 255).astype(np.uint8)
+    # normalize the image to have integer values
+    normalized_image = (
+        ((masked_image - masked_image.min()) / (masked_image.max() - masked_image.min()) * 255)
+        .astype(np.uint8))
 
-    # Initialize GLCM features
+    # initialize GLCM features
     features = {
         "contrast": 0,
         "correlation": 0,
         "dissimilarity": 0,
         "homogeneity": 0,
-        #"energy": 0
+        "energy": 0
     }
 
-    # Iterate through each slice of the 3D image
+    # iterate through each slice of the 3D image
     for i in range(normalized_image.shape[0]):
         slice_image = normalized_image[i, :, :]
         slice_mask = mask[i, :, :]
 
-        # Skip slices without any mask
+        # skip slices without any mask
         if np.sum(slice_mask) == 0:
             continue
 
-        # Compute GLCM for the slice
+        # compute GLCM for the slice
         glcm = graycomatrix(slice_image, distances=distances, angles=angles,
                             levels=256, symmetric=True, normed=True)
 
-        # Accumulate GLCM features
+        # accumulate GLCM features
         for feature in features.keys():
             features[feature] += np.mean(graycoprops(glcm, feature))
 
-    # Average the features over all slices
+    # average the features over all slices
     num_slices = np.sum([np.sum(mask[i, :, :]) > 0 for i in range(mask.shape[0])])
     if num_slices > 0:
         for feature in features.keys():
@@ -296,7 +246,8 @@ def extract_tumour_properties(img: np.ndarray, mask: np.ndarray) -> list:
 
     # extract features from segmented image
     img_lesion = mask > 0
-    segmented_features = segmentation_features(img_lesion, [1, 1, 1])
+    #segmented_features = segmentation_features(img_lesion, [1, 1, 1])
+    morph_features = shape_morphological_features(mask)
 
     # re-scale the grayscale image to be same size as the mask
     # and halve the dimensions to decrease processing time
@@ -304,13 +255,13 @@ def extract_tumour_properties(img: np.ndarray, mask: np.ndarray) -> list:
     mask = zoom(mask, (0.5, 0.5, 0.5), order=1)
 
     # extract features from the grayscale image
-    #glcm_features = gray_level_cooccurrence_features(img.copy(), mask.copy())
     glcm_features = get_glcm_features_3d(img.copy(), mask.copy())
 
     # extract features from both the grayscale and the segmented images
     intensity_feats = intensity_features(img.copy(), mask.copy())
 
-    features = (list(segmented_features.values())
+    features = (#list(segmented_features.values())
+                list(morph_features.values())
                 + list(intensity_feats.values())
                 + list(glcm_features.values()))
 

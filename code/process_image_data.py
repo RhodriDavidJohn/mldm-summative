@@ -38,10 +38,12 @@ def process_images(batch: list, save_loc: str) -> None:
     
     columns = (["patient_id"] +
                ["n_tumours", "maximum_diameter", "surface_area", # segmented features
-                "surface_to_volume_ratio", "volume", "radius"] +
+                "surface_to_volume_ratio", "volume", "radius",
+                "sphericity", "elongation", "compactness"] +
                ["mean_intensity", "std_intensity", "min_intensity", # intensity features
                 "max_intensity", "median_intensity"] +
-               ["contrast", "correlation", "dissimilarity", "homogeneity"]) # grayscale features
+               ["contrast", "correlation", "dissimilarity", # grayscale features
+                "homogeneity", "energy"])
 
     df = pd.DataFrame(data=data, columns=columns)
 
