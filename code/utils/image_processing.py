@@ -120,11 +120,15 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
     # label the connected regions in the tumor array
     labeled_tumour = label(tumour_array)
     properties = regionprops(labeled_tumour)
+
+    # calculate surface area
+    verts, faces, _, _ = marching_cubes(tumour_array, 0.5)
+    surface_area = mesh_surface_area(verts, faces)
      
     features = {
         "n_tumours": len(properties),
         "maximum_diameter": 0,
-        "surface_area": 0,
+        "surface_area": surface_area,
         "surface_to_volume_ratio": 0,
         "volume": 0,
         "radius": 0,
@@ -136,10 +140,6 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
     for prop in properties:
         # calculate volume
         volume = prop.area
-
-        # calculate surface area
-        verts, faces, _, _ = marching_cubes(tumour_array == prop.label)
-        surface_area = mesh_surface_area(verts, faces)
 
         # calculate sphericity
         sphericity = (np.pi**(1/3) * (6 * volume)**(2/3)) / surface_area
@@ -164,7 +164,6 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
         features["compactness"].append(compactness)
 
         # aggregate features
-        features["surface_area"] += surface_area
         features["volume"] += volume
         features["maximum_diameter"] = max(features["maximum_diameter"], max_diameter)
         features["radius"] += radius
