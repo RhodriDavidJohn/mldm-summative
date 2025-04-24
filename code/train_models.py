@@ -12,7 +12,7 @@ def train_models(data_name: str, k_folds: int,
 
     # load the data
     input_dir = 'data/clean'
-    data_dict = load_data(input_dir)
+    data_dict = load_data(input_dir, n_batches)
 
     try:
         assert data_name in data_dict.keys()

@@ -188,7 +188,7 @@ def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tup
     return (X_train_bootstrap, X_test, y_train_bootstrap, y_test)
 
 
-def load_data(input_dir: str) -> dict:
+def load_data(input_dir: str, n_batches: int) -> dict:
 
     data_path_dict = {
         **{'clinical1': os.path.join(input_dir, 'clinical1.csv'),

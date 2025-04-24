@@ -168,9 +168,10 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
     # calculate surface to volume ratio
     features["surface_to_volume_ratio"] = features["surface_area"] / features["volume"]
     # calculate sphericity
-    features["sphericity"] = (np.pi**(1/3) * (6 * features["volume"])**(2/3)) / surface_area
+    features["sphericity"] = ((np.pi**(1/3) * (6 * features["volume"])**(2/3))
+                              / features["surface_area"])
     # calculate compactness
-    features["compactness"] = (surface_area**3)/(features["volume"]**2)
+    features["compactness"] = (features["surface_area"]**3)/(features["volume"]**2)
 
     # average elongation over all regions
     features["elongation"] = np.mean(features["elongation"])
