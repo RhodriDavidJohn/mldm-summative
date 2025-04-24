@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import numpy as np
 import pydicom
-from skimage.measure import label, marching_cubes, mesh_surface_area
+from skimage.measure import label, marching_cubes, mesh_surface_area, regionprops
 from skimage.feature import graycomatrix, graycoprops
 from scipy.spatial.distance import  pdist
 from scipy.ndimage import zoom
@@ -177,10 +177,10 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
 
 
 
-def get_glcm_features_3d(image: np.ndarray,
-                         mask: np.ndarray,
-                         distances=[1],
-                         angles=[0, np.pi/4, np.pi/2, 3*np.pi/4]) -> dict:
+def glcm_features_3d(image: np.ndarray,
+                     mask: np.ndarray,
+                     distances=[1],
+                     angles=[0, np.pi/4, np.pi/2, 3*np.pi/4]) -> dict:
     
     # apply the mask to the image
     masked_image = image * (mask > 0)
@@ -255,7 +255,7 @@ def extract_tumour_properties(img: np.ndarray, mask: np.ndarray) -> list:
     mask = zoom(mask, (0.5, 0.5, 0.5), order=1)
 
     # extract features from the grayscale image
-    glcm_features = get_glcm_features_3d(img.copy(), mask.copy())
+    glcm_features = glcm_features_3d(img.copy(), mask.copy())
 
     # extract features from both the grayscale and the segmented images
     intensity_feats = intensity_features(img.copy(), mask.copy())
