@@ -147,7 +147,12 @@ def shape_morphological_features(tumour_array: np.ndarray) -> dict:
         # calculate elongation
         min_axis_length = min(prop.major_axis_length, prop.minor_axis_length)
         max_axis_length = max(prop.major_axis_length, prop.minor_axis_length)
-        elongation = max_axis_length / min_axis_length
+        if min_axis_length != 0:
+            elongation = max_axis_length / min_axis_length
+        else:
+            # no elongation
+            elongation = 1
+
 
         # calculate compactness
         compactness = (surface_area**2) / volume
