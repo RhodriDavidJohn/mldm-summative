@@ -103,7 +103,8 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
     1) clean column names
     2) rename columns
     3) categorise data
-    4) derive 2 year survival feature
+    4) engineer mutation feature
+    5) derive 2 year survival feature
 
     Finally, the processed data are saved to the clean data folder.
     """
@@ -146,57 +147,39 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
     # so they don't get imputed with 'impossible' values during model training
     df['pack_years'] = [0 if df.loc[i, 'smoking_status']=='nonsmoker'
                         else df.loc[i, 'pack_years'] for i in range(len(df))]
-        
-    missing_value_replacement = {
-        'not assessed': np.nan, 'not recorded in database': np.nan,
-        'not collected': np.nan, 'unknown': np.nan
-    }
-
-    binary_value_replacement = {
-        'dead': 1, 'alive': 0
-    }
-
-    gg_replacement = {
-        '0%': 0, '>0 - 25%': 1, '25 - 50%': 2, '50 - 75%': 3, '75 - < 100%': 4, '100%': 5
-    }
-
-    t_stage_replacement = {
-        'tis': 0, 't1a': 1, 't1b': 1, 't2a':2, 't2b': 2, 't3': 3, 't4': 4
-    }
-
-    n_stage_replacement = {
-        'n0': 0, 'n1': 1, 'n2': 2, 'n3': 3
-    }
-
-    m_stage_replacement = {
-        'm0': 0, 'm1a': 1, 'm1b': 2, 'm1c': 3
-    }
-
-    hist_grade_replacement = {
-        'g1 well differentiated': 1,
+    
+    replacement_dict = {
+        'not assessed': np.nan, 'not recorded in database': np.nan,  # missing values
+        'not collected': np.nan, 'unknown': np.nan,
+        'dead': 1, 'alive': 0,                                       # target binary
+        '0%': 0, '>0 - 25%': 1, '25 - 50%': 2, '50 - 75%': 3,        # gg % categories
+        '75 - < 100%': 4, '100%': 5,
+        'tis': 0, 't1a': 1, 't1b': 1, 't2a':2, 't2b': 2,             # t stage categories
+        't3': 3, 't4': 4,
+        'n0': 0, 'n1': 1, 'n2': 2, 'n3': 3,                          # n stage categories
+        'm0': 0, 'm1a': 1, 'm1b': 2, 'm1c': 3,                       # m stage categories
+        'g1 well differentiated': 1,                                 # hist grade categories
         'other, type i: well to moderately differentiated': 1,
         'g2 moderately differentiated': 2,
         'other, type ii: moderately to poorly differentiated': 2,
-        'g3 poorly differentiated': 3
-    }
-
-    word_replacements = {
-        'nsclc nos (not otherwise specified)': 'nos',
+        'g3 poorly differentiated': 3,
+        'nsclc nos (not otherwise specified)': 'nos',                # word replacements
         'asian': 'other',
         'african-american': 'other',
         'hispanic/latino': 'other',
         'native hawaiian/pacific islander': 'other'
     }
 
-    replacements = [missing_value_replacement, binary_value_replacement, gg_replacement,
-                    t_stage_replacement, n_stage_replacement, m_stage_replacement,
-                    hist_grade_replacement, word_replacements]
-    replacement_dict = {}
-    for dictionary in replacements:
-        for key, value in dictionary.items():
-            replacement_dict[key] = value
-
     df.replace(replacement_dict, inplace=True)
+
+    # for ordered categories replace null values with -1
+    df['gg_percentage'] = df['gg_percentage'].fillna(-1)
+    df['clinical_t_stage'] = df['clinical_t_stage'].fillna(-1)
+    df['clinical_n_stage'] = df['clinical_n_stage'].fillna(-1)
+    df['clinical_m_stage'] = df['clinical_m_stage'].fillna(-1)
+    df['overall_stage'] = df['overall_stage'].fillna(-1)
+
+    df['histology'] = df['histology'].str.replace(' ', '_')
 
     # engineer feature to summarise gene mutation
     def condition(i):
@@ -206,16 +189,6 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
         )
         return cond
     df['gene_mutation'] = ['yes' if condition(i) else 'no' for i in range(len(df))]
-
-    # for ordered categories replace null values with -1
-    df['gg_percentage'] = df['gg_percentage'].fillna(-1)
-    df['clinical_t_stage'] = df['clinical_t_stage'].fillna(-1)
-    df['clinical_n_stage'] = df['clinical_n_stage'].fillna(-1)
-    df['clinical_m_stage'] = df['clinical_m_stage'].fillna(-1)
-    df['overall_stage'] = df['overall_stage'].fillna(-1)
-
-    for col in ['histology', 'ethnicity']:
-        df[col] = df[col].str.replace(' ', '_')
 
     # derive a variable for survival time
     df['date_of_last_known_alive'] = pd.to_datetime(df['date_of_last_known_alive'])

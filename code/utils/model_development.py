@@ -186,3 +186,37 @@ def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tup
     hlp.save_csv(test_data, test_data_msg, os.path.join(model_data_path, 'test.csv'))
 
     return (X_train_bootstrap, X_test, y_train_bootstrap, y_test)
+
+
+def load_data(input_dir: str) -> dict:
+
+    data_path_dict = {
+        **{'clinical1': os.path.join(input_dir, 'clinical1.csv'),
+        'clinical2': os.path.join(input_dir, 'clinical2.csv'),
+        'clinical_joined': os.path.join(input_dir, 'clinical_joined.csv')},
+        **{f'image_features_{i}': os.path.join(input_dir, f'image_features_{i}.csv') for i in range(1, n_batches+1)}
+    }
+
+    image_features_list = []
+    for key in data_path_dict.keys():
+        if 'image_features' in key:
+            image_features_list.append(
+                hlp.load_csv(data_path_dict[key])
+            )
+    image_features = pd.concat(image_features_list, axis=0)
+
+    data_dict = {
+        'clinical1': hlp.load_csv(data_path_dict['clinical1']),
+        'clinical2': hlp.load_csv(data_path_dict['clinical2']),
+        'clinical_joined': hlp.load_csv(data_path_dict['clinical_joined']),
+        'image_features': image_features
+    }
+
+    data_dict['full_data'] = (
+        data_dict['clinical_joined']
+        .merge(right=data_dict['image_features'].drop('death_2years', axis=1),
+               on='patient_id',
+               how='left')
+    )
+
+    return data_dict

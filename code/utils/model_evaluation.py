@@ -125,7 +125,7 @@ def model_evaluation(model_type: str, model: Pipeline, data_name: str,
                      X_test: pd.DataFrame, y_test: pd.Series) -> pd.DataFrame:
     
     if model_type=="lreg":
-        model_type_long = "LASSO Regression"
+        model_type_long = "LASSO"
     elif model_type=="mlp":
         model_type_long = "MLP"
     else:
