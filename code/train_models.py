@@ -28,7 +28,7 @@ def train_models(data_name: str, k_folds: int,
     X_train, X_test, y_train, y_test = get_train_test(data, data_name, random_seed)
 
     model_data = {
-        "X_train": X_train
+        "X_train": X_train,
         "y_train": y_train
     }
 
