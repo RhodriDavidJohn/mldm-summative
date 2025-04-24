@@ -10,7 +10,8 @@ dependencies:
   - pandas==2.2.3
   - scikit-image==0.25.2
   - scikit-learn==1.6.1
-  - pydicom=3.0.1
-  - snakemake=9.3.0
-  - graphviz
-prefix: /Users/rhodridavies/miniconda3/envs/mldm-env
+  - pydicom==3.0.1
+  - shap==0.47.2
+  - snakemake==9.3.0
+  - snakemake-executor-plugin-slurm==1.2.1
+  - graphviz==12.2.1
