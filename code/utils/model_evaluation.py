@@ -5,7 +5,7 @@ import joblib
 from sklearn.pipeline import Pipeline
 import shap
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_auc_score, f1_score, roc_curve, auc
+from sklearn.metrics import roc_auc_score, f1_score, roc_curve, auc, balanced_accuracy_score
 
 
 
@@ -35,13 +35,15 @@ def get_metrics(model_type: str, model: Pipeline, data_name: str,
     y_pred_proba = model.predict_proba(X_test)[:, 1]
 
     # calculate metrics
+    accuracy = balanced_accuracy_score(y_test, y_pred)
     auc = roc_auc_score(y_test, y_pred_proba)
     f1 = f1_score(y_test, y_pred)
 
     metrics_df = pd.DataFrame({
         ("", "Data"): [data_name],
+        (model_type, "Weighted Accuracy"): [round(accuracy, 2)],
         (model_type, "AUC"): [round(auc, 2)],
-        (model_type, "F1 score"): [round(f1, 2)]
+        (model_type, "F1 Score"): [round(f1, 2)]
     })
 
     return metrics_df
@@ -83,6 +85,10 @@ def plot_coefs(model: Pipeline, data_name: str, filepath: str):
 
     # get feature names
     features = model.named_steps["preprocessing"].get_feature_names_out()
+    try:
+        features = [feature.split('__')[1] for feature in features]
+    except:
+        pass
 
     # extract the model part of pipeline
     ml_model = model.named_steps["lreg"]
@@ -97,8 +103,8 @@ def plot_coefs(model: Pipeline, data_name: str, filepath: str):
     plt.figure(figsize=(24,14))
     plt.barh(plot_data.index, plot_data.coefficients)
 
-    plt.xlabel("Model Coefficient Value", fontsize=14)
-    plt.ylabel("Feature Name", fontsize=14)
+    plt.xlabel("Model coefficient value", fontsize=14)
+    plt.ylabel("Feature value", fontsize=14)
 
     title = (f"Top {len(plot_data)} LASSO model "
              f"coefficients for {data_name} data")
