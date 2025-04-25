@@ -3,8 +3,8 @@ default-resources:
 - slurm_account="sscm033324"
 - mem_mb="1000"
 - runtime="6000"
-- ntasks="5"
-- nodes="5"
+- ntasks="1"
+- nodes="1"
 jobs: 12
 printshellcmds: True
 scheduler: greedy
