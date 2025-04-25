@@ -29,10 +29,13 @@ rule all:
     "The default rule"
     input:
         expand("results/{data}_model_metrics.csv", data=[d for d in config["model_data"]]),
-        expand("results/{plot}_plots/{model}_{data}_model_{plot}.png",
+        expand("results/roc_plots/{model}_{data}_model_roc.png",
                model=["lreg", "mlp"],
-               data=[d for d in config["model_data"]],
-               plot=["roc", "shap"])
+               data=[d for d in config["model_data"]]),
+        expand("results/feature_plots/lreg_{data}_model_coefs.png",
+               data=[d for d in config["model_data"]]),
+        expand("results/feature_plots/mlp_{data}_model_shap.png",
+               data=[d for d in config["model_data"]])
 
 rule process_clinical:
     "Process raw clinical data"
@@ -82,9 +85,9 @@ for data in config["model_data"]:
             k_folds = f"{config["k_folds"]}",
             n_batches = f"{n_batches}"
         input:
-            f"data/clean/clinical1.csv",
-            f"data/clean/clinical2.csv",
-            f"data/clean/clinical_joined.csv",
+            "data/clean/clinical1.csv",
+            "data/clean/clinical2.csv",
+            "data/clean/clinical_joined.csv",
             expand("data/clean/image_features_{i}.csv", i=range(1, n_batches+1))
         output: 
             expand("data/models/{data}/{type}.csv", data=data, type=["train", "test"]),
@@ -111,8 +114,11 @@ for data in config["model_data"]:
             expand("results/models/{model}_{data}_model.pkl", model=["lreg", "mlp"], data=data)
         output: 
             f"results/{data}_model_metrics.csv",
-            expand("results/{plot}_plots/{model}_{data}_model_{plot}.png",
-                   model=["lreg", "mlp"], data=data, plot=["roc", "shap"])
+            expand("results/roc_plots/{model}_{data}_model_roc.png",
+                   model=["lreg", "mlp"],
+                   data=data),
+            f"results/feature_plots/lreg_{data}_model_coefs.png",
+            f"results/feature_plots/mlp_{data}_model_shap.png"
         log:
             f"logs/snakemake/evaluate_{data}_models.log"
         shell: """
