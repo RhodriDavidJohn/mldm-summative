@@ -7,7 +7,7 @@ from utils.model_development import *
 from utils import helpers as hlp
 
 
-def train_models(data_name: str, k_folds: int,
+def train_models(data_name: str, test_size: float, k_folds: int,
                  random_seed: int, n_batches: int) -> None:
 
     # load the data
@@ -25,7 +25,7 @@ def train_models(data_name: str, k_folds: int,
     data = data_dict[data_name]
 
     # split the data into train and test set
-    X_train, X_test, y_train, y_test = get_train_test(data, data_name, random_seed)
+    X_train, X_test, y_train, y_test = get_train_test(data, data_name, test_size, random_seed)
 
     model_data = {
         "X_train": X_train,
@@ -71,5 +71,6 @@ if __name__=="__main__":
     seed = int(argv[2])
     k_folds = int(argv[3])
     n_batches = int(argv[4])
+    test_size = float(argv[5])
 
-    train_models(data_name, k_folds, seed, n_batches)
+    train_models(data_name, test_size, k_folds, seed, n_batches)

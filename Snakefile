@@ -83,7 +83,8 @@ for data in config["model_data"]:
             data = f"{data}",
             random_seed = f"{config["random_seed"]}",
             k_folds = f"{config["k_folds"]}",
-            n_batches = f"{n_batches}"
+            n_batches = f"{n_batches}",
+            test_split = f"{config["test_split"]}"
         input:
             "data/clean/clinical1.csv",
             "data/clean/clinical2.csv",
@@ -99,7 +100,7 @@ for data in config["model_data"]:
         date 2>&1 | tee -a {log}
         mkdir -p data/models/{params.data} 2>&1 | tee -a {log}
         mkdir -p results/models 2>&1 | tee -a {log}
-        python code/train_models.py {params.data} {params.random_seed} {params.k_folds} {params.n_batches} 2>&1 | tee -a {log}
+        python code/train_models.py {params.data} {params.random_seed} {params.k_folds} {params.n_batches} {params.test_split} 2>&1 | tee -a {log}
         echo "Finished developing models for {params.data} data" 2>&1 | tee -a {log}
         date 2>&1 | tee -a {log}
         """

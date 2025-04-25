@@ -155,13 +155,13 @@ def save_ml_model(model, model_name: str, data_name: str,
     return None
 
 
-def get_train_test(data: pd.DataFrame, data_name: str, random_state: int) -> tuple:
+def get_train_test(data: pd.DataFrame, data_name: str, test_size: float, random_state: int) -> tuple:
 
     X = data.drop(columns=['death_2years']).copy()
     y = data['death_2years'].copy()
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, stratify=y, random_state=random_state
+        X, y, test_size=test_size, stratify=y, random_state=random_state
     )
 
     train_data = X_train.join(y_train)
