@@ -133,7 +133,7 @@ for data in config["model_data"]:
 rule clean:
     "Clean up"
     shell: """
-    if [ -d logs ]; then
+    if [ -d logs/snakemake ]; then
       echo "Removing directory logs/snakemake"
       rm -r logs/snakemake
     else
