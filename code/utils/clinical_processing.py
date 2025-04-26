@@ -75,7 +75,7 @@ def process_clinical1_data(filepath) -> pd.DataFrame:
     df['clinical_n_stage'] = df['clinical_n_stage'].replace({4: np.nan})
 
     # derive 2 year survival
-    df['survivaltime_yrs'] = df['survival_time']/364.25
+    df['survivaltime_yrs'] = df['survival_time']/365.25
     # remove people who have are still alive but their survival
     # time is less than 2 years
     df = df[~((df['survivaltime_yrs']<2)&(df['deadstatus_event']==0))].reset_index(drop=True).copy()
@@ -197,7 +197,7 @@ def process_clinical2_data(filepath) -> pd.DataFrame:
                               - df['days_between_ct_and_surgery'])
     df['survival_time_dv'] = [df.loc[i, 'survival_time'] if pd.isna(df.loc[i, 'survival_time_dv'])
                               else df.loc[i, 'survival_time_dv'] for i in df.index]
-    df['survivaltime_yrs'] = df['survival_time_dv']/364.25
+    df['survivaltime_yrs'] = df['survival_time_dv']/365.25
 
     # remove people who have are still alive but their survival
     # time is less than 2 years
