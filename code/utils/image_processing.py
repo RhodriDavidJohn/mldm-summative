@@ -82,39 +82,6 @@ def create_3d_image(slices: list) -> np.ndarray:
     return np.stack(slices, axis=0)
 
 
-def segmentation_features(tumour_array: np.ndarray, voxel_size: list) -> dict:
-
-    if np.sum(tumour_array) > 0:
-        _, n_tumours = label(tumour_array, return_num=True)
-        verts,faces,_,_ = marching_cubes(tumour_array,0.5,spacing=voxel_size)
-        area = mesh_surface_area(verts,faces)
-        volume = np.sum(tumour_array > 0.1)*voxel_size[0]*voxel_size[1]*voxel_size[2]
-        radius = (3.0/(4.0*np.pi)*volume)**(1.0/3)
-
-        # break vertices into chunks to avoid memory issues
-        chunk_size = 1000
-        max_distance = 0
-        for i in range(0, len(verts), chunk_size):
-            chunk = verts[i:(i + chunk_size)]
-            distance = pdist(chunk)
-            max_distance = max(max_distance, np.amax(distance))
-
-
-        features = {"n_tumours": n_tumours,
-                    "maximum_diameter": max_distance,
-                    "surface_area": area,
-                    "surface_to_volume_ratio" : area/volume,
-                    "volume": volume,
-                    "radius": radius
-                    }
-
-
-        return features
-    else:
-        return 0
-
-
-
 def shape_morphological_features(tumour_array: np.ndarray) -> dict:
 
     # label the connected regions in the tumor array
@@ -249,7 +216,6 @@ def extract_tumour_properties(img: np.ndarray, mask: np.ndarray) -> list:
 
     # extract features from segmented image
     img_lesion = mask > 0
-    #segmented_features = segmentation_features(img_lesion, [1, 1, 1])
     morph_features = shape_morphological_features(mask)
 
     # re-scale the grayscale image to be same size as the mask
