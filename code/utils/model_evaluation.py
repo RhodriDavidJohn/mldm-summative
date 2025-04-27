@@ -100,16 +100,20 @@ def plot_coefs(model: Pipeline, data_name: str, filepath: str):
     plot_data = df.head(10).copy()
 
     # plot the top 10 coefficients
-    plt.figure(figsize=(24,14))
+    plt.figure(figsize=(24,16))
     plt.barh(plot_data.index, plot_data.coefficients)
 
-    plt.xlabel("Model coefficient value", fontsize=14)
-    plt.ylabel("Feature value", fontsize=14)
+    # hide the top, right, and left spines
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['left'].set_visible(False)
+
+    plt.xlabel("Model coefficient value")
+    plt.ylabel("Feature value")
 
     title = (f"Top {len(plot_data)} LASSO model "
              f"coefficients for {data_name} data")
-    plt.title(title,
-              fontsize=16, pad=20)
+    plt.title(title, pad=20)
 
     # save the plot
     plt.savefig(filepath)
