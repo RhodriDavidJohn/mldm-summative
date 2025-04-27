@@ -15,3 +15,4 @@ dependencies:
   - snakemake==9.3.0
   - snakemake-executor-plugin-slurm==1.2.1
   - graphviz==12.2.1
+  - ipykernel==6.29.5
